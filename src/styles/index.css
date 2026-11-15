@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Soft, glamorous palette (AGENT.md §1) — CSS variables for theming */
+  --c-bg: #faf6f3;
+  --c-surface: #ffffff;
+  --c-surface-2: #f1e9ef;
+  --c-ink: #2b2333;
+  --c-ink-soft: #8a8091;
+  --c-accent: #b06a8f;
+  --c-accent-deep: #8a4a6e;
+  --c-gold: #d4a853;
+  --c-line: #e7dde4;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    sans-serif;
+}
+
+img {
+  user-select: none;
+}
+
+/* Respect reduced motion globally for CSS transitions (AGENT.md §9) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Visible keyboard focus everywhere */
+:focus-visible {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 2px;
+}
