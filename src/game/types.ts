@@ -20,7 +20,9 @@ export type LayerId =
 
 export type BlendMode = 'normal' | 'multiply' | 'soft-light';
 
-export type PoseId = 'relaxed' | 'handOnHip' | 'twirl';
+export type PoseId = 'relaxed' | 'handOnHip' | 'twirl' | 'runway' | 'vogue';
+
+export type PhotoFraming = 'full' | 'half' | 'portrait';
 
 /** A rendered layer instruction for the character compositor. */
 export interface RenderLayer {
@@ -210,7 +212,26 @@ export interface PhotoShot {
   backgroundId: string;
   poseId: PoseId;
   filterId: string;
+  framing?: PhotoFraming;
+  magazineCover?: boolean;
   dataUrl: string;
+}
+
+export interface SavedLookRecipe {
+  skinToneId: string;
+  eyeColorId: string;
+  freckles: boolean;
+  beautyMark: boolean;
+  skinHealth?: number;
+  makeup: Partial<
+    Record<MakeupSlot, { itemId: string; variantId?: string; intensity: number; finish?: LipFinish }>
+  >;
+  hair: { styleId?: string; variantId?: string; colorCustom?: string; parting: Parting; shine: boolean };
+  outfit: Partial<Record<OutfitSlot, { itemId: string; variantId?: string }>>;
+  accessories: Partial<Record<AccessorySlot, { itemId: string; variantId?: string }>>;
+  pose?: PoseId;
+  backgroundId?: string;
+  filterId?: string;
 }
 
 /* ---------- Base customization ---------- */

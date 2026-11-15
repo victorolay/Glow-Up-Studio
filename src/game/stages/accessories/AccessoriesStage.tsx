@@ -1,13 +1,14 @@
+import { getAsset } from '@/assets';
 import { CharacterCanvas } from '@/components/character/CharacterCanvas';
 import { StageFrame } from '@/components/layout/StageFrame';
 import { Button } from '@/components/ui/Button';
+import { CloseIcon } from '@/components/ui/Icons';
 import { ItemCard } from '@/components/ui/ItemCard';
 import { PreviewThumb } from '@/components/ui/PreviewThumb';
 import { TabBar, type TabDef } from '@/components/ui/TabBar';
-import { getAsset } from '@/assets';
 import { ACCESSORY_ITEMS } from '@/data/items/accessories';
-import { FLOW, useGameStore } from '@/game/store/gameStore';
 import { useCharacterStore } from '@/game/store/characterStore';
+import { FLOW, useGameStore } from '@/game/store/gameStore';
 import { useProgressStore } from '@/game/store/progressStore';
 import { playSfx } from '@/utils/sound';
 import type { AccessorySlot, Challenge } from '@/game/types';
@@ -31,9 +32,9 @@ const TABS: Array<TabDef & { slot: AccessorySlot }> = [
 /** Focus point per accessory slot for the cropped preview. */
 const FOCUS: Record<AccessorySlot, { y: number; x: number; zoom: number }> = {
   glasses: { y: 134, x: 300, zoom: 0.85 },
-  hat: { y: 60, x: 300, zoom: 0.7 },
-  scarf: { y: 380, x: 300, zoom: 0.6 },
-  necklace: { y: 335, x: 300, zoom: 0.7 },
+  hat: { y: 74, x: 300, zoom: 0.72 },
+  scarf: { y: 295, x: 300, zoom: 0.75 },
+  necklace: { y: 262, x: 300, zoom: 1.05 },
   earrings: { y: 160, x: 251, zoom: 0.95 },
   bag: { y: 610, x: 430, zoom: 0.6 },
   hairAccessory: { y: 102, x: 374, zoom: 0.95 },
@@ -67,73 +68,95 @@ export function AccessoriesStage({ challenge }: { challenge: Challenge }) {
       challenge={challenge}
       onBack={back}
       onNext={next}
-      nextLabel="Photo Studio ›"
+      nextLabel="Photo Studio"
       dots={{ current: FLOW.indexOf('accessories'), total: FLOW.length }}
+      defaultZoom="full"
+      renderMirror={(zoomMode) => (
+        <CharacterCanvas
+          zoomMode={zoomMode}
+          ariaLabel="Your character wearing selected accessories"
+        />
+      )}
+      mirrorFooter={
+        selection ? (
+          <Button variant="ghost" className="w-full" onClick={() => setAccessory(activeSlot, null)}>
+            Remove accessory
+          </Button>
+        ) : undefined
+      }
     >
-      <div className="flex flex-col gap-4 lg:flex-row">
-        <div className="mx-auto w-full max-w-[280px] shrink-0">
-          <CharacterCanvas ariaLabel="Your character wearing selected accessories" />
-          {selection && (
-            <Button variant="ghost" className="mt-1 w-full" onClick={() => setAccessory(activeSlot, null)}>
-              Remove accessory
-            </Button>
-          )}
-        </div>
-        <div className="flex-1">
-          <TabBar tabs={TABS} active={tab} onChange={setTab} ariaLabel="Accessory categories" />
-          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-            <Button
-              variant={selection ? 'soft' : 'primary'}
-              className="h-auto flex-col py-3"
-              onClick={() => setAccessory(activeSlot, null)}
-              aria-pressed={!selection}
-              data-testid={`accessory-none-${activeSlot}`}
-            >
-              <span className="text-lg" aria-hidden="true">
-                ⭘
-              </span>
-              None
-            </Button>
-            {items.map((item) => {
-              const selected = selection?.itemId === item.id;
-              const unlocked = isItemUnlocked(item);
-              const variant = item.variants?.[0];
-              return (
-                <ItemCard
-                  key={item.id}
-                  name={item.name}
-                  tags={item.tags}
-                  selected={selected}
-                  onClick={() => {
-                    setAccessory(activeSlot, { itemId: item.id, variantId: variant?.id });
-                    void playSfx('tap', muted);
-                  }}
-                  previewSrc={
-                    <PreviewThumb
-                      src={getAsset(item.asset, { color: variant?.colors.primary, color2: variant?.colors.secondary })}
-                      focusY={FOCUS[activeSlot].y}
-                      focusX={FOCUS[activeSlot].x}
-                      zoom={FOCUS[activeSlot].zoom}
-                      height={84}
-                    />
+      <div className="space-y-4">
+        <TabBar tabs={TABS} active={tab} onChange={setTab} ariaLabel="Accessory categories" />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <button
+            type="button"
+            onClick={() => setAccessory(activeSlot, null)}
+            aria-pressed={!selection}
+            data-testid={`accessory-none-${activeSlot}`}
+            className={`flex min-h-[140px] flex-col items-center justify-center gap-2 rounded-2xl border p-4 text-center transition focus-visible:outline-2 focus-visible:outline-accent ${
+              !selection
+                ? 'border-accent bg-surface ring-2 ring-accent/35 shadow-soft'
+                : 'border-line bg-surface-2/40 text-ink-soft hover:border-accent/40 hover:text-ink'
+            }`}
+          >
+            <span className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-surface">
+              <CloseIcon className="h-4 w-4" />
+            </span>
+            <span className="text-sm font-semibold text-ink">None</span>
+          </button>
+
+          {items.map((item) => {
+            const selected = selection?.itemId === item.id;
+            const unlocked = isItemUnlocked(item);
+            const defaultVariant = item.variants?.[0];
+            const activeVariant =
+              (selected && selection?.variantId
+                ? item.variants?.find((v) => v.id === selection.variantId)
+                : undefined) ?? defaultVariant;
+            return (
+              <ItemCard
+                key={item.id}
+                name={item.name}
+                tags={item.tags}
+                selected={selected}
+                onClick={() => {
+                  setAccessory(activeSlot, { itemId: item.id, variantId: activeVariant?.id });
+                  void playSfx('tap', muted);
+                }}
+                previewSrc={
+                  <PreviewThumb
+                    src={getAsset(item.asset, {
+                      color: activeVariant?.colors.primary,
+                      color2: activeVariant?.colors.secondary,
+                    })}
+                    focusY={FOCUS[activeSlot].y}
+                    focusX={FOCUS[activeSlot].x}
+                    zoom={FOCUS[activeSlot].zoom}
+                    height={96}
+                  />
+                }
+                variants={item.variants?.map((v) => ({
+                  id: v.id,
+                  name: v.name,
+                  color: v.colors.primary,
+                }))}
+                activeVariantId={selected ? selection?.variantId ?? activeVariant?.id : undefined}
+                onVariantClick={(vId) =>
+                  setAccessory(activeSlot, { itemId: item.id, variantId: vId })
+                }
+                lockedCost={unlocked ? undefined : item.unlock.cost}
+                affordable={coins >= (item.unlock.cost ?? 0)}
+                onUnlock={() => {
+                  if (tryUnlockItem(item)) {
+                    void playSfx('sparkle', muted);
+                    setAccessory(activeSlot, { itemId: item.id, variantId: activeVariant?.id });
+                    setTick((t) => t + 1);
                   }
-                  variants={item.variants?.map((v) => ({ id: v.id, name: v.name, color: v.colors.primary }))}
-                  activeVariantId={selected ? selection?.variantId ?? variant?.id : undefined}
-                  onVariantClick={(vId) => setAccessory(activeSlot, { itemId: item.id, variantId: vId })}
-                  lockedCost={unlocked ? undefined : item.unlock.cost}
-                  affordable={coins >= (item.unlock.cost ?? 0)}
-                  onUnlock={() => {
-                    if (tryUnlockItem(item)) {
-                      void playSfx('sparkle', muted);
-                      setAccessory(activeSlot, { itemId: item.id, variantId: variant?.id });
-                      setTick((t) => t + 1);
-                    }
-                  }}
-                  testid={`accessory-item-${item.id}`}
-                />
-              );
-            })}
-          </div>
+                }}
+                testid={`accessory-item-${item.id}`}
+              />
+            );
+          })}
         </div>
       </div>
     </StageFrame>

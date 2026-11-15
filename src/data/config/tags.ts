@@ -46,6 +46,11 @@ export const STYLE_TAGS = [
   'natural',
   'glam',
   'bold',
+  'party',
+  'club',
+  'nigerian',
+  'ankara',
+  'traditional',
   // Wear style
   'barefoot',
 ] as const;

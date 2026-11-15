@@ -300,6 +300,55 @@ export function cozyDen(): string {
   );
 }
 
+export function clubLounge(): string {
+  return scene(
+    `<defs>` +
+      `<linearGradient id="clBg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d081c"/><stop offset="58%" stop-color="#22103d"/><stop offset="100%" stop-color="#140c24"/></linearGradient>` +
+      `<radialGradient id="clSpot1" cx="25%" cy="18%" r="55%"><stop offset="0" stop-color="#e048b8" stop-opacity="0.42"/><stop offset="100%" stop-color="#e048b8" stop-opacity="0"/></radialGradient>` +
+      `<radialGradient id="clSpot2" cx="78%" cy="22%" r="55%"><stop offset="0" stop-color="#38bdf8" stop-opacity="0.34"/><stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/></radialGradient>` +
+      `<linearGradient id="clFloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f1136"/><stop offset="100%" stop-color="#0a0612"/></linearGradient>` +
+      `</defs>` +
+      `<rect width="1000" height="1600" fill="url(#clBg)"/>` +
+      `<rect width="1000" height="1200" fill="url(#clSpot1)"/>` +
+      `<rect width="1000" height="1200" fill="url(#clSpot2)"/>` +
+      `<polygon points="180,0 440,1220 40,1220" fill="#e879f9" opacity="0.10"/>` +
+      `<polygon points="820,0 960,1220 560,1220" fill="#38bdf8" opacity="0.10"/>` +
+      `<circle cx="500" cy="180" r="68" fill="#cbd5e1" opacity="0.22"/>` +
+      `<rect x="110" y="380" width="780" height="520" rx="28" fill="none" stroke="#f472b6" stroke-width="4" opacity="0.35"/>` +
+      `<rect x="128" y="398" width="744" height="484" rx="20" fill="none" stroke="#60a5fa" stroke-width="2" opacity="0.28"/>` +
+      `<g opacity="0.52">` +
+      `<circle cx="210" cy="540" r="24" fill="#f59e0b"/><circle cx="290" cy="490" r="14" fill="#f472b6"/>` +
+      `<circle cx="710" cy="510" r="18" fill="#38bdf8"/><circle cx="790" cy="560" r="22" fill="#f59e0b"/>` +
+      `</g>` +
+      `<path d="M80,980 C80,920 140,900 340,900 L660,900 C860,900 920,920 920,980 L920,1200 L80,1200 Z" fill="#2e1042"/>` +
+      `<path d="M120,1010 L880,1010 L880,1180 L120,1180 Z" fill="#42155c" opacity="0.72"/>` +
+      `<rect y="1160" width="1000" height="440" fill="url(#clFloor)"/>` +
+      `<ellipse cx="500" cy="1340" rx="340" ry="70" fill="#e879f9" opacity="0.16"/>`,
+  );
+}
+
+export function owambeHall(): string {
+  return scene(
+    `<defs>` +
+      `<linearGradient id="owWall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#143b2e"/><stop offset="55%" stop-color="#1e4e3d"/><stop offset="100%" stop-color="#2b1e16"/></linearGradient>` +
+      `<radialGradient id="owGlow" cx="50%" cy="22%" r="60%"><stop offset="0" stop-color="#fde68a" stop-opacity="0.45"/><stop offset="100%" stop-color="#fde68a" stop-opacity="0"/></radialGradient>` +
+      `<linearGradient id="owFloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c99b52"/><stop offset="100%" stop-color="#7c5624"/></linearGradient>` +
+      `</defs>` +
+      `<rect width="1000" height="1600" fill="url(#owWall)"/>` +
+      `<rect width="1000" height="1220" fill="url(#owGlow)"/>` +
+      `<path d="M0,0 Q250,220 500,90 Q750,220 1000,0 L1000,320 Q750,380 500,260 Q250,380 0,320 Z" fill="#d4a853" opacity="0.34"/>` +
+      `<path d="M0,0 L170,0 L130,1160 L0,1160 Z" fill="#0f2c22" opacity="0.78"/>` +
+      `<path d="M830,0 L1000,0 L1000,1160 L870,1160 Z" fill="#0f2c22" opacity="0.78"/>` +
+      `<rect x="260" y="290" width="480" height="720" rx="240" fill="#f7eedc" opacity="0.12" stroke="#e6c15a" stroke-width="4"/>` +
+      `<g fill="#fde68a" opacity="0.78">` +
+      `<circle cx="500" cy="145" r="22"/><circle cx="445" cy="180" r="10"/><circle cx="555" cy="180" r="10"/>` +
+      `<circle cx="400" cy="210" r="8"/><circle cx="600" cy="210" r="8"/>` +
+      `</g>` +
+      `<rect y="1160" width="1000" height="440" fill="url(#owFloor)"/>` +
+      `<ellipse cx="500" cy="1340" rx="330" ry="64" fill="#fef3c7" opacity="0.22"/>`,
+  );
+}
+
 export const BACKGROUND_GENERATORS: Record<string, () => string> = {
   placeholder_bg_sandy_beach: sandyBeach,
   placeholder_bg_beach_cafe: beachCafe,
@@ -313,6 +362,8 @@ export const BACKGROUND_GENERATORS: Record<string, () => string> = {
   placeholder_bg_pumpkin_patch: pumpkinPatch,
   placeholder_bg_snowy_village: snowyVillage,
   placeholder_bg_cozy_den: cozyDen,
+  placeholder_bg_club_lounge: clubLounge,
+  placeholder_bg_owambe_hall: owambeHall,
 };
 
 export function backgroundAsset(assetId: string): string {

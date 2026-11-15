@@ -3,16 +3,25 @@
 @tailwind utilities;
 
 :root {
-  /* Soft, glamorous palette (AGENT.md §1) — CSS variables for theming */
-  --c-bg: #faf6f3;
+  /* Editorial luxury palette — 60/30/10 neutral-to-accent discipline with WCAG AA contrast */
+  --c-bg: #faf7f5;
+  --c-bg-rgb: 250 247 245;
   --c-surface: #ffffff;
-  --c-surface-2: #f1e9ef;
-  --c-ink: #2b2333;
-  --c-ink-soft: #8a8091;
-  --c-accent: #b06a8f;
-  --c-accent-deep: #8a4a6e;
-  --c-gold: #d4a853;
-  --c-line: #e7dde4;
+  --c-surface-rgb: 255 255 255;
+  --c-surface-2: #f3ecef;
+  --c-surface-2-rgb: 243 236 239;
+  --c-ink: #231b29;
+  --c-ink-rgb: 35 27 41;
+  --c-ink-soft: #675b6f;
+  --c-ink-soft-rgb: 103 91 111;
+  --c-accent: #9e4f76;
+  --c-accent-rgb: 158 79 118;
+  --c-accent-deep: #7b385a;
+  --c-accent-deep-rgb: 123 56 90;
+  --c-gold: #b8893a;
+  --c-gold-rgb: 184 137 58;
+  --c-line: #e5dae0;
+  --c-line-rgb: 229 218 224;
 }
 
 html,
@@ -23,14 +32,24 @@ body,
 
 body {
   margin: 0;
+  background-color: var(--c-bg);
+  color: var(--c-ink);
   -webkit-font-smoothing: antialiased;
   font-family:
+    'Plus Jakarta Sans',
     system-ui,
     -apple-system,
     'Segoe UI',
     Roboto,
-    'Helvetica Neue',
     sans-serif;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 img {

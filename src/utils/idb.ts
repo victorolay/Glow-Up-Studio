@@ -1,3 +1,5 @@
+import type { SavedLookRecipe } from '@/game/types';
+
 /** Minimal IndexedDB wrapper for the lookbook (photos stay on-device, §10). */
 
 export interface SavedLook {
@@ -8,6 +10,7 @@ export interface SavedLook {
   score?: number;
   stars?: number;
   thumbnail: string; // data URL
+  recipe?: SavedLookRecipe;
 }
 
 const DB_NAME = 'glow-up-studio';

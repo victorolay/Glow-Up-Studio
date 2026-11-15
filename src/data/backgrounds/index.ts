@@ -14,6 +14,8 @@ export const BACKGROUNDS: BackgroundDef[] = [
   { id: 'bg-pumpkin-patch', name: 'Pumpkin Patch', tags: ['holiday', 'cozy', 'casual'], asset: 'placeholder_bg_pumpkin_patch' },
   { id: 'bg-snowy-village', name: 'Snowy Village', tags: ['winter', 'holiday', 'cozy'], asset: 'placeholder_bg_snowy_village' },
   { id: 'bg-cozy-den', name: 'Cozy Den', tags: ['cozy', 'casual', 'knit'], asset: 'placeholder_bg_cozy_den' },
+  { id: 'bg-club-lounge', name: 'VIP Night Club', tags: ['club', 'party', 'evening', 'bold'], asset: 'placeholder_bg_club_lounge' },
+  { id: 'bg-owambe-hall', name: 'Owambe Marquee', tags: ['nigerian', 'traditional', 'formal', 'glam'], asset: 'placeholder_bg_owambe_hall' },
 ];
 
 /** Photo filters; tags can earn the photo-match bonus (AGENT.md §5.8). */
@@ -24,6 +26,24 @@ export const FILTERS: FilterDef[] = [
     name: 'Golden Hour',
     css: 'sepia(0.22) saturate(1.18) hue-rotate(-8deg) brightness(1.03)',
     tags: ['summer', 'beach'],
+  },
+  {
+    id: 'velvet-night',
+    name: 'Velvet Night',
+    css: 'contrast(1.08) saturate(1.22) hue-rotate(-10deg) brightness(0.95)',
+    tags: ['club', 'evening', 'bold'],
+  },
+  {
+    id: 'editorial-warm',
+    name: 'Editorial Warm',
+    css: 'sepia(0.14) contrast(1.08) saturate(1.14)',
+    tags: ['formal', 'glam', 'nigerian'],
+  },
+  {
+    id: 'runway-flash',
+    name: 'Runway Flash',
+    css: 'contrast(1.14) brightness(1.05) saturate(1.06)',
+    tags: ['party', 'glam'],
   },
   {
     id: 'cool-breeze',

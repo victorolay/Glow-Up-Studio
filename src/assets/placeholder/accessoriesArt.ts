@@ -400,6 +400,30 @@ function heartLocketPendant(p: AssetParams): string {
   `);
 }
 
+function edoCoralBeadsNecklace(p: AssetParams): string {
+  const coral = p.color ?? '#c83424';
+  const r = ramp(coral);
+  const rows = [
+    { count: 14, yBase: 238, dip: 18, radius: 3.4 },
+    { count: 16, yBase: 245, dip: 28, radius: 3.8 },
+    { count: 18, yBase: 252, dip: 40, radius: 4.2 },
+  ];
+  const beads: string[] = [];
+  for (const row of rows) {
+    for (let i = 0; i <= row.count; i++) {
+      const t = i / row.count;
+      const x = 270 + t * 60;
+      const y = row.yBase + Math.sin(t * Math.PI) * row.dip;
+      const rad = row.radius * (0.85 + 0.25 * Math.sin(t * Math.PI));
+      const isGoldSpacer = i === 4 || i === row.count - 4;
+      beads.push(
+        `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${rad.toFixed(1)}" fill="${isGoldSpacer ? 'url(#metalGold)' : r.mid}" stroke="${r.deep}" stroke-width="0.6" />`,
+      );
+    }
+  }
+  return toUri(defsBlock(r) + beads.join(''));
+}
+
 /* ============================================================================
  * 11. WRISTWATCHES (6 Styles Fitted to Right Wrist x407-429, y536-556)
  * ============================================================================ */
@@ -524,6 +548,23 @@ function satinPaddedHeadband(p: AssetParams): string {
   `);
 }
 
+function nigerianGeleHeadtie(p: AssetParams): string {
+  const r = ramp(p.color ?? '#8b1e2d');
+  const gold = p.color2 ?? '#e6c35c';
+  return toUri(`
+    ${defsBlock(r)}
+    <!-- Dramatic fanned sculptural Aso-Oke Gele resting snugly at forehead hairline y102-114 -->
+    <path d="M 250 120 C 222 98, 212 64, 228 42 C 264 30, 336 30, 372 42 C 388 64, 378 98, 350 120 C 330 105, 270 105, 250 120 Z" fill="url(#fVert)" stroke="${r.deep}" stroke-width="1.2" />
+    <path d="M 252 118 C 244 94, 246 70, 258 54 C 284 46, 316 46, 342 54 C 354 70, 356 94, 348 118 C 326 103, 274 103, 252 118 Z" fill="url(#fBody)" />
+    <!-- Crisp layered Aso-Oke pleats with woven gold metallic thread -->
+    <path d="M 228 60 C 268 46, 332 46, 372 60" stroke="${gold}" stroke-width="1.6" opacity="0.76" fill="none" />
+    <path d="M 232 74 C 272 60, 328 60, 368 74" stroke="${r.deep}" stroke-width="2.1" opacity="0.54" fill="none" />
+    <path d="M 237 87 C 274 75, 326 75, 363 87" stroke="${gold}" stroke-width="1.6" opacity="0.76" fill="none" />
+    <path d="M 244 100 C 276 89, 324 89, 356 100" stroke="${r.deep}" stroke-width="2.1" opacity="0.60" fill="none" />
+    <path d="M 251 114 C 278 102, 322 102, 349 114" stroke="${gold}" stroke-width="1.8" opacity="0.86" fill="none" />
+  `);
+}
+
 function silkNeckScarf(p: AssetParams): string {
   const r = ramp(p.color ?? '#b83344');
   const accent = p.color2 ?? '#f5e8d0';
@@ -588,7 +629,7 @@ function operaEveningGloves(p: AssetParams): string {
     `C 404 510, 399 474, 400 440 C 401 410, 396 380, 398 352 Z`;
 
   let leftGloveEl = mirrored(`<path d="${rightGlove}" fill="url(#fBody)" />`);
-  if (p.pose === 'handOnHip') {
+  if (p.pose === 'handOnHip' || p.pose === 'vogue') {
     leftGloveEl = `<path d="M 168 350 C 180 356, 192 354, 200 346 C 192 380, 186 410, 192 436 C 204 468, 214 500, 224 532 C 228 544, 228 554, 224 558 C 218 562, 212 558, 208 548 C 198 518, 184 484, 168 446 C 156 416, 156 384, 168 350 Z" fill="url(#fBody)" />`;
   } else if (p.pose === 'twirl') {
     leftGloveEl = `<path d="M 200 190 C 212 186, 222 188, 230 194 C 222 162, 218 134, 218 118 C 218 102, 214 92, 206 90 C 196 88, 188 96, 186 112 C 184 134, 190 162, 200 190 Z" fill="url(#fBody)" />`;
@@ -668,6 +709,7 @@ export const ACCESSORY_GENERATORS: Record<string, (p: AssetParams) => string> = 
   neck_cuban_collar: chunkyCubanCollar,
   neck_lariat_emerald: lariatYDropNecklace,
   neck_heart_locket: heartLocketPendant,
+  neck_coral_beads: edoCoralBeadsNecklace,
 
   // Wristwatches
   watch_gold_classic: goldClassicWatch,
@@ -680,6 +722,7 @@ export const ACCESSORY_GENERATORS: Record<string, (p: AssetParams) => string> = 
   // Completing Accessories
   acc_sun_hat: wideBrimSunHat,
   acc_french_beret: frenchWoolBeret,
+  acc_gele_headtie: nigerianGeleHeadtie,
   acc_satin_headband: satinPaddedHeadband,
   acc_silk_scarf: silkNeckScarf,
   acc_leather_belt: leatherWaistBelt,
@@ -734,6 +777,7 @@ export const ACCESSORY_CATALOG: StyleCatalogEntry[] = [
   { id: 'neck_cuban_collar', name: 'Chunky Cuban Link Collar', category: 'necklaces', defaultColor: 'gold' },
   { id: 'neck_lariat_emerald', name: 'Emerald Y-Drop Lariat', category: 'necklaces', defaultColor: 'gold', defaultColor2: '#1e7a52' },
   { id: 'neck_heart_locket', name: 'Rose-Gold Heart Locket', category: 'necklaces', defaultColor: 'rose' },
+  { id: 'neck_coral_beads', name: 'Edo Coral Bead Collar', category: 'necklaces', defaultColor: '#c83424' },
 
   // Wristwatches
   { id: 'watch_gold_classic', name: 'Champagne Dial Gold Watch', category: 'watches', defaultColor: '#f7f1e3' },
@@ -746,6 +790,7 @@ export const ACCESSORY_CATALOG: StyleCatalogEntry[] = [
   // Completing Accessories
   { id: 'acc_sun_hat', name: 'Wide-Brim Riviera Sun Hat', category: 'accessories', defaultColor: '#dfd0ad', defaultColor2: '#1e1b20' },
   { id: 'acc_french_beret', name: 'Crimson Wool Beret', category: 'accessories', defaultColor: '#9e192d' },
+  { id: 'acc_gele_headtie', name: 'Sculpted Aso-Oke Gele', category: 'accessories', defaultColor: '#8b1e2d', defaultColor2: '#e6c35c' },
   { id: 'acc_satin_headband', name: 'Padded Satin Headband', category: 'accessories', defaultColor: '#2e4e44' },
   { id: 'acc_silk_scarf', name: 'Knotted Silk Neck Scarf', category: 'accessories', defaultColor: '#b83344', defaultColor2: '#f5e8d0' },
   { id: 'acc_leather_belt', name: 'Gold-Buckle Waist Belt', category: 'accessories', defaultColor: '#221c18' },

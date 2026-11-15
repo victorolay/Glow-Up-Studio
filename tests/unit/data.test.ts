@@ -1,7 +1,8 @@
-import { ALL_WEARABLES, CHALLENGES, getBackground } from '@/data/catalog';
+import { ALL_WEARABLES, CHALLENGES, HAIR_ITEMS, OUTFIT_ITEMS, getBackground } from '@/data/catalog';
 import { STYLE_TAGS } from '@/data/config/tags';
 import { GENERATORS } from '@/assets/placeholder/registry';
 import { getAsset } from '@/assets';
+import { countMatchingClothesForChallenge } from '@/game/engine/studioHelpers';
 
 describe('catalog data schemas', () => {
   it('item ids are unique', () => {
@@ -91,6 +92,17 @@ describe('catalog data schemas', () => {
         expect(['body', 'skin', 'makeup', 'face', 'hairBack', 'bottoms', 'swim', 'tops', 'dress', 'outerwear', 'shoes', 'accessory', 'hairFront']).toContain(layer);
       }
     }
+  });
+
+  it('provides at least 10 non-shoe matching clothes for every graded Occasion Brief', () => {
+    for (const challenge of CHALLENGES) {
+      if (challenge.freePlay) continue;
+      expect(countMatchingClothesForChallenge(challenge, OUTFIT_ITEMS)).toBeGreaterThanOrEqual(10);
+    }
+  });
+
+  it('ships at least 28 wigs and hairstyles', () => {
+    expect(HAIR_ITEMS.length).toBeGreaterThanOrEqual(28);
   });
 });
 

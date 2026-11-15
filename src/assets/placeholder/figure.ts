@@ -3,35 +3,47 @@ import { shade, toUri } from './primitives';
 import type { PoseId, SkinTone } from '@/game/types';
 
 /*
- * Base figure: stylized-vector illustration of the adult curvy hourglass model
- * on the shared 600×1280 canvas, split into the pipeline's body / skin / face
- * layers. Skin tone is applied by deriving the gradient ramps from the selected
- * tone so shading, undertones and highlights are preserved across the inclusive
- * tone range (AGENT.md §6 skin tones).
+ * Base figure: studio-lit photorealistic illustration of the adult curvy
+ * hourglass model on the shared 600×1280 canvas, split into body / skin / face
+ * layers. Exact anatomical landmarks are preserved so every wardrobe, hair,
+ * makeup, and accessory asset aligns cleanly across all 8 skin tones and 3 poses.
  */
 
 const FALLBACK_TONE: SkinTone = { id: 'honey', name: 'Honey', base: '#e3b491', shadow: '#bd8e6c' };
 
 interface Ramp {
+  hi: string;
   light: string;
   mid: string;
   mid2: string;
   dark: string;
   deep: string;
+  subsurface: string;
+  lipUpper: string;
+  lipLower: string;
+  lipLine: string;
 }
 
 function ramp(tone: SkinTone): Ramp {
   const base = tone.base;
   return {
-    light: shade(base, 0.3),
+    hi: shade(base, 0.42),
+    light: shade(base, 0.26),
     mid: base,
-    mid2: shade(base, -0.1),
-    dark: shade(base, -0.26),
-    deep: shade(base, -0.42),
+    mid2: shade(base, -0.11),
+    dark: shade(base, -0.27),
+    deep: shade(base, -0.44),
+    subsurface: shade(base, -0.18),
+    lipUpper: shade(base, -0.42),
+    lipLower: shade(base, -0.22),
+    lipLine: shade(base, -0.56),
   };
 }
 
 const BLUR_FILTERS = `
+    <filter id="softBlur1" filterUnits="userSpaceOnUse" x="0" y="0" width="600" height="1280">
+      <feGaussianBlur stdDeviation="1.1" />
+    </filter>
     <filter id="softBlur2" filterUnits="userSpaceOnUse" x="0" y="0" width="600" height="1280">
       <feGaussianBlur stdDeviation="2.2" />
     </filter>
@@ -40,74 +52,87 @@ const BLUR_FILTERS = `
     </filter>
     <filter id="softBlur8" filterUnits="userSpaceOnUse" x="0" y="0" width="600" height="1280">
       <feGaussianBlur stdDeviation="8.5" />
-    </filter>
-    <filter id="softBlur12" filterUnits="userSpaceOnUse" x="0" y="0" width="600" height="1280">
-      <feGaussianBlur stdDeviation="12" />
     </filter>`;
 
 function skinDefs(r: Ramp): string {
   return `
     ${BLUR_FILTERS}
-    <linearGradient id="skinTorsoGrad" x1="15%" y1="12%" x2="88%" y2="85%">
+    <linearGradient id="skinTorsoGrad" x1="14%" y1="10%" x2="88%" y2="86%">
       <stop offset="0%" stop-color="${r.light}" />
-      <stop offset="34%" stop-color="${r.mid}" />
-      <stop offset="70%" stop-color="${r.mid2}" />
+      <stop offset="32%" stop-color="${r.mid}" />
+      <stop offset="72%" stop-color="${r.mid2}" />
       <stop offset="100%" stop-color="${r.dark}" />
     </linearGradient>
-    <linearGradient id="skinNeckGrad" x1="15%" y1="0%" x2="85%" y2="100%">
+    <radialGradient id="skinFaceGrad" cx="44%" cy="38%" r="58%">
+      <stop offset="0%" stop-color="${r.light}" />
+      <stop offset="48%" stop-color="${r.mid}" />
+      <stop offset="82%" stop-color="${r.mid2}" />
+      <stop offset="100%" stop-color="${r.dark}" />
+    </radialGradient>
+    <linearGradient id="skinNeckGrad" x1="18%" y1="0%" x2="84%" y2="100%">
       <stop offset="0%" stop-color="${r.dark}" />
-      <stop offset="30%" stop-color="${r.mid}" />
-      <stop offset="72%" stop-color="${r.light}" />
+      <stop offset="32%" stop-color="${r.mid}" />
+      <stop offset="70%" stop-color="${r.light}" />
       <stop offset="100%" stop-color="${r.dark}" />
     </linearGradient>
-    <linearGradient id="skinArmLeftGrad" x1="0%" y1="10%" x2="100%" y2="78%">
+    <linearGradient id="skinArmLeftGrad" x1="0%" y1="12%" x2="100%" y2="78%">
       <stop offset="0%" stop-color="${r.light}" />
-      <stop offset="46%" stop-color="${r.mid}" />
+      <stop offset="44%" stop-color="${r.mid}" />
+      <stop offset="85%" stop-color="${r.mid2}" />
       <stop offset="100%" stop-color="${r.dark}" />
     </linearGradient>
-    <linearGradient id="skinArmRightGrad" x1="0%" y1="20%" x2="100%" y2="68%">
+    <linearGradient id="skinArmRightGrad" x1="0%" y1="18%" x2="100%" y2="70%">
       <stop offset="0%" stop-color="${r.dark}" />
-      <stop offset="36%" stop-color="${r.mid}" />
-      <stop offset="80%" stop-color="${r.light}" />
-      <stop offset="100%" stop-color="${r.mid2}" />
+      <stop offset="36%" stop-color="${r.mid2}" />
+      <stop offset="74%" stop-color="${r.mid}" />
+      <stop offset="100%" stop-color="${r.light}" />
     </linearGradient>
-    <linearGradient id="skinLegLeftGrad" x1="10%" y1="14%" x2="94%" y2="56%">
+    <linearGradient id="skinLegLeftGrad" x1="12%" y1="14%" x2="94%" y2="58%">
       <stop offset="0%" stop-color="${r.light}" />
-      <stop offset="42%" stop-color="${r.mid}" />
-      <stop offset="84%" stop-color="${r.mid2}" />
+      <stop offset="40%" stop-color="${r.mid}" />
+      <stop offset="82%" stop-color="${r.mid2}" />
       <stop offset="100%" stop-color="${r.dark}" />
     </linearGradient>
     <linearGradient id="skinLegRightGrad" x1="6%" y1="20%" x2="92%" y2="65%">
       <stop offset="0%" stop-color="${r.dark}" />
-      <stop offset="28%" stop-color="${r.mid2}" />
+      <stop offset="30%" stop-color="${r.mid2}" />
       <stop offset="68%" stop-color="${r.mid}" />
       <stop offset="100%" stop-color="${r.light}" />
     </linearGradient>
-    <radialGradient id="skinSpecular" cx="42%" cy="38%" r="58%">
-      <stop offset="0%" stop-color="${r.light}" stop-opacity="0.88" />
-      <stop offset="55%" stop-color="${r.light}" stop-opacity="0.30" />
+    <radialGradient id="skinSpecular" cx="42%" cy="36%" r="58%">
+      <stop offset="0%" stop-color="${r.hi}" stop-opacity="0.82" />
+      <stop offset="52%" stop-color="${r.light}" stop-opacity="0.28" />
       <stop offset="100%" stop-color="${r.light}" stop-opacity="0" />
     </radialGradient>
-    <radialGradient id="bustLeftVol" cx="38%" cy="35%" r="62%">
-      <stop offset="0%" stop-color="${r.light}" stop-opacity="0.92" />
-      <stop offset="48%" stop-color="${r.mid}" stop-opacity="0.52" />
-      <stop offset="85%" stop-color="${r.dark}" stop-opacity="0.22" />
+    <radialGradient id="bustLeftVol" cx="38%" cy="34%" r="62%">
+      <stop offset="0%" stop-color="${r.hi}" stop-opacity="0.72" />
+      <stop offset="42%" stop-color="${r.mid}" stop-opacity="0.48" />
+      <stop offset="85%" stop-color="${r.dark}" stop-opacity="0.24" />
       <stop offset="100%" stop-color="${r.deep}" stop-opacity="0" />
     </radialGradient>
-    <radialGradient id="bustRightVol" cx="42%" cy="35%" r="62%">
-      <stop offset="0%" stop-color="${r.light}" stop-opacity="0.72" />
-      <stop offset="48%" stop-color="${r.mid}" stop-opacity="0.46" />
+    <radialGradient id="bustRightVol" cx="42%" cy="34%" r="62%">
+      <stop offset="0%" stop-color="${r.light}" stop-opacity="0.68" />
+      <stop offset="45%" stop-color="${r.mid}" stop-opacity="0.44" />
       <stop offset="86%" stop-color="${r.dark}" stop-opacity="0.28" />
       <stop offset="100%" stop-color="${r.deep}" stop-opacity="0" />
     </radialGradient>
     <radialGradient id="warmSubsurfaceGlow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#D97B6C" stop-opacity="0.26" />
-      <stop offset="100%" stop-color="#D97B6C" stop-opacity="0" />
+      <stop offset="0%" stop-color="#D46F5E" stop-opacity="0.24" />
+      <stop offset="100%" stop-color="#D46F5E" stop-opacity="0" />
     </radialGradient>
     <linearGradient id="rimLightGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#FFE6B8" stop-opacity="0.48" />
-      <stop offset="100%" stop-color="#FFE6B8" stop-opacity="0" />
-    </linearGradient>`;
+      <stop offset="0%" stop-color="${r.hi}" stop-opacity="0.54" />
+      <stop offset="100%" stop-color="${r.hi}" stop-opacity="0" />
+    </linearGradient>
+    <linearGradient id="torsoHipFade" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+      <stop offset="84%" stop-color="#ffffff" stop-opacity="1" />
+      <stop offset="96%" stop-color="#ffffff" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+    </linearGradient>
+    <mask id="torsoSeamlessMask">
+      <rect x="170" y="185" width="260" height="496" fill="url(#torsoHipFade)" />
+    </mask>`;
 }
 
 /* ---------- Arm pose variants (left arm authored per pose; right stays relaxed) ---------- */
@@ -153,6 +178,8 @@ const ARM_BY_POSE: Record<PoseId, string> = {
   relaxed: ARM_RELAXED_LEFT,
   handOnHip: ARM_HAND_ON_HIP_LEFT,
   twirl: ARM_TWIRL_LEFT,
+  runway: ARM_RELAXED_LEFT,
+  vogue: ARM_HAND_ON_HIP_LEFT,
 };
 
 const ARM_RELAXED_RIGHT = `M 376 270
@@ -231,26 +258,6 @@ const TORSO = `M 277 192
   C 389 268, 358 266, 340 253
   C 325 240, 322 218, 323 192 Z`;
 
-const TORSO_CLIP = `M 277 192
-  C 278 218, 275 240, 260 253
-  C 242 266, 211 268, 196 282
-  L 219 330
-  C 218 355, 209 376, 213 398
-  C 217 418, 234 438, 241 464
-  C 246 481, 245 497, 238 514
-  C 223 546, 186 575, 186 623
-  C 186 643, 191 659, 200 673
-  C 230 655, 271 673, 300 677
-  C 329 673, 370 655, 400 673
-  C 409 659, 414 643, 414 623
-  C 414 575, 377 546, 362 514
-  C 355 497, 354 481, 359 464
-  C 366 438, 383 418, 387 398
-  C 391 376, 382 355, 381 330
-  L 404 282
-  C 389 268, 358 266, 340 253
-  C 325 240, 322 218, 323 192 Z`;
-
 const LEGS_CLIP = `M 186 623
   C 186 664, 184 714, 195 768
   C 206 820, 215 868, 222 906
@@ -279,57 +286,75 @@ const FACE_OVAL = `M 300 84
   C 340 179, 346 158, 346 134
   C 346 105, 328 84, 300 84 Z`;
 
+function leftArmDetails(pose: PoseId, r: Ramp): string {
+  if (pose === 'handOnHip' || pose === 'vogue') {
+    return (
+      `<path d="M 192 292 C 174 332, 162 372, 166 416 C 174 378, 184 338, 198 296 Z" fill="url(#skinSpecular)" opacity="0.54" filter="url(#softBlur4)" />` +
+      `<path d="M 188 378 C 180 412, 182 436, 198 474 C 190 456, 184 432, 184 406 Z" fill="${r.dark}" opacity="0.34" filter="url(#softBlur2)" />` +
+      `<ellipse cx="218" cy="548" rx="4.5" ry="6" fill="url(#skinSpecular)" opacity="0.45" filter="url(#softBlur2)" />` +
+      `<ellipse cx="222" cy="555" rx="1.6" ry="2.2" fill="#FBE8E2" opacity="0.62" />`
+    );
+  }
+  if (pose === 'twirl') {
+    return (
+      `<path d="M 206 122 C 202 158, 206 196, 224 238 C 216 198, 212 162, 214 124 Z" fill="url(#skinSpecular)" opacity="0.52" filter="url(#softBlur4)" />` +
+      `<ellipse cx="204" cy="96" rx="4" ry="5" fill="#FBE8E2" opacity="0.38" filter="url(#softBlur2)" />`
+    );
+  }
+  return (
+    `<path d="M 180 312 C 172 350, 168 394, 171 434 C 177 400, 182 354, 188 314 Z" fill="url(#skinSpecular)" opacity="0.62" filter="url(#softBlur4)" />` +
+    `<path d="M 176 446 C 174 476, 174 514, 177 546" stroke="${r.light}" stroke-width="3.2" opacity="0.42" filter="url(#softBlur2)" fill="none" />` +
+    `<path d="M 193 366 C 195 408, 193 446, 190 496 C 194 498, 198 472, 200 438 C 201 406, 199 376, 193 366 Z" fill="${r.dark}" opacity="0.38" filter="url(#softBlur4)" />` +
+    `<ellipse cx="184" cy="574" rx="10" ry="14" fill="url(#warmSubsurfaceGlow)" />` +
+    `<path d="M 180 598 C 180 612, 180 624, 181 632" stroke="${r.deep}" stroke-width="1.0" opacity="0.42" stroke-linecap="round" />` +
+    `<path d="M 190 596 C 192 610, 193 622, 193 630" stroke="${r.deep}" stroke-width="0.95" opacity="0.40" stroke-linecap="round" />` +
+    `<path d="M 174 590 C 176 594, 188 594, 194 590" stroke="${r.light}" stroke-width="1.4" opacity="0.38" fill="none" />` +
+    `<ellipse cx="175" cy="631" rx="1.6" ry="2.5" fill="#FBE8E2" opacity="0.72" />` +
+    `<ellipse cx="189" cy="632" rx="1.5" ry="2.3" fill="#FBE8E2" opacity="0.66" />` +
+    `<ellipse cx="202" cy="619" rx="1.3" ry="1.9" fill="#FBE8E2" opacity="0.55" />`
+  );
+}
+
 export function bodyAsset(p: AssetParams): string {
   const tone = p.skinTone ?? FALLBACK_TONE;
   const r = ramp(tone);
-  const armLeft = ARM_BY_POSE[p.pose ?? 'relaxed'];
+  const pose = p.pose ?? 'relaxed';
+  const armLeft = ARM_BY_POSE[pose];
 
   return toUri(`
     <defs>${skinDefs(r)}
-      <clipPath id="torsoClip"><path d="${TORSO_CLIP}" /></clipPath>
+      <clipPath id="torsoClip"><path d="${TORSO}" /></clipPath>
       <clipPath id="legsClip"><path d="${LEGS_CLIP}" /></clipPath>
+      <clipPath id="faceClip"><path d="${FACE_OVAL}" /></clipPath>
     </defs>
-
-    <g id="arms-and-hands">
-      <path d="${armLeft}" fill="url(#skinArmLeftGrad)" />
-      <path d="M 180 312 C 172 350, 168 394, 171 434 C 177 400, 182 354, 188 314 Z" fill="url(#skinSpecular)" opacity="0.62" filter="url(#softBlur4)" />
-      <path d="M 193 366 C 195 408, 193 446, 190 496 C 194 498, 198 472, 200 438 C 201 406, 199 376, 193 366 Z" fill="${r.dark}" opacity="0.38" filter="url(#softBlur4)" />
-      <path d="M 180 598 C 180 612, 180 624, 181 632" stroke="${r.deep}" stroke-width="1.0" opacity="0.40" stroke-linecap="round" />
-      <path d="M 190 596 C 192 610, 193 622, 193 630" stroke="${r.deep}" stroke-width="0.95" opacity="0.38" stroke-linecap="round" />
-      <ellipse cx="175" cy="631" rx="1.5" ry="2.4" fill="#FBE8E2" opacity="0.68" />
-      <ellipse cx="189" cy="632" rx="1.4" ry="2.2" fill="#FBE8E2" opacity="0.62" />
-      <path d="${ARM_RELAXED_RIGHT}" fill="url(#skinArmRightGrad)" />
-      <path d="M 420 314 C 427 354, 431 398, 428 438 C 423 404, 419 357, 413 316 Z" fill="url(#skinSpecular)" opacity="0.42" filter="url(#softBlur4)" />
-      <path d="M 405 354 C 401 400, 401 448, 406 506 C 400 492, 397 460, 398 436 C 398 404, 399 374, 405 354 Z" fill="${r.dark}" opacity="0.42" filter="url(#softBlur4)" />
-      <path d="M 420 598 C 420 612, 420 624, 419 632" stroke="${r.deep}" stroke-width="1.0" opacity="0.42" stroke-linecap="round" />
-      <path d="M 410 596 C 408 610, 407 622, 407 630" stroke="${r.deep}" stroke-width="0.95" opacity="0.40" stroke-linecap="round" />
-      <ellipse cx="425" cy="631" rx="1.5" ry="2.4" fill="#FBE8E2" opacity="0.58" />
-      <ellipse cx="411" cy="632" rx="1.4" ry="2.2" fill="#FBE8E2" opacity="0.56" />
-    </g>
 
     <g id="legs-and-feet">
       <path d="${LEG_LEFT}" fill="url(#skinLegLeftGrad)" />
       <path d="${LEG_RIGHT}" fill="url(#skinLegRightGrad)" />
       <g clip-path="url(#legsClip)">
-        <path d="M 299 671 C 292 736, 283 801, 274 869 C 283 836, 294 777, 300 716 C 306 777, 317 836, 326 869 C 317 801, 308 736, 301 671 Z" fill="${r.deep}" opacity="0.38" filter="url(#softBlur4)" />
-        <path d="M 202 654 C 194 712, 202 780, 222 846 C 232 796, 230 722, 222 654 Z" fill="url(#skinSpecular)" opacity="0.68" filter="url(#softBlur8)" />
+        <path d="M 299 671 C 292 736, 283 801, 274 869 C 283 836, 294 777, 300 716 C 306 777, 317 836, 326 869 C 317 801, 308 736, 301 671 Z" fill="${r.deep}" opacity="0.40" filter="url(#softBlur4)" />
+        <path d="M 202 654 C 194 712, 202 780, 222 846 C 232 796, 230 722, 222 654 Z" fill="url(#skinSpecular)" opacity="0.70" filter="url(#softBlur8)" />
         <path d="M 389 658 C 397 716, 389 782, 370 846 C 360 796, 362 724, 370 658 Z" fill="url(#skinSpecular)" opacity="0.46" filter="url(#softBlur8)" />
-        <ellipse cx="249" cy="908" rx="14" ry="19" fill="url(#skinSpecular)" opacity="0.62" filter="url(#softBlur4)" />
-        <ellipse cx="351" cy="910" rx="13" ry="18" fill="url(#skinSpecular)" opacity="0.48" filter="url(#softBlur4)" />
-        <path d="M 237 922 C 245 928, 256 928, 263 921" stroke="${r.mid}" stroke-width="2.2" opacity="0.34" filter="url(#softBlur2)" fill="none" />
-        <path d="M 338 924 C 346 930, 357 930, 364 923" stroke="${r.mid}" stroke-width="2.2" opacity="0.38" filter="url(#softBlur2)" fill="none" />
+        <ellipse cx="249" cy="906" rx="14" ry="18" fill="url(#skinSpecular)" opacity="0.64" filter="url(#softBlur4)" />
+        <ellipse cx="351" cy="908" rx="13" ry="17" fill="url(#skinSpecular)" opacity="0.48" filter="url(#softBlur4)" />
+        <ellipse cx="249" cy="904" rx="8" ry="10" fill="${r.hi}" opacity="0.34" filter="url(#softBlur2)" />
+        <ellipse cx="351" cy="906" rx="7.5" ry="9.5" fill="${r.hi}" opacity="0.24" filter="url(#softBlur2)" />
+        <path d="M 237 922 C 245 928, 256 928, 263 921" stroke="${r.dark}" stroke-width="2.0" opacity="0.32" filter="url(#softBlur2)" fill="none" />
+        <path d="M 338 924 C 346 930, 357 930, 364 923" stroke="${r.dark}" stroke-width="2.0" opacity="0.36" filter="url(#softBlur2)" fill="none" />
         <ellipse cx="250" cy="908" rx="18" ry="20" fill="url(#warmSubsurfaceGlow)" />
         <ellipse cx="351" cy="910" rx="18" ry="20" fill="url(#warmSubsurfaceGlow)" />
-        <path d="M 239 955 C 236 1015, 240 1075, 246 1138 C 253 1075, 254 1015, 250 955 Z" fill="url(#skinSpecular)" opacity="0.60" filter="url(#softBlur4)" />
-        <path d="M 353 957 C 356 1017, 352 1077, 346 1140 C 340 1077, 339 1017, 343 957 Z" fill="url(#skinSpecular)" opacity="0.42" filter="url(#softBlur4)" />
-        <path d="M 272 956 C 282 1006, 281 1062, 266 1126 C 261 1072, 264 1008, 272 956 Z" fill="${r.dark}" opacity="0.34" filter="url(#softBlur4)" />
-        <path d="M 328 956 C 318 1006, 319 1062, 334 1126 C 339 1072, 336 1008, 328 956 Z" fill="${r.dark}" opacity="0.38" filter="url(#softBlur4)" />
+        <path d="M 239 955 C 236 1015, 240 1075, 246 1138 C 253 1075, 254 1015, 250 955 Z" fill="url(#skinSpecular)" opacity="0.64" filter="url(#softBlur4)" />
+        <path d="M 353 957 C 356 1017, 352 1077, 346 1140 C 340 1077, 339 1017, 343 957 Z" fill="url(#skinSpecular)" opacity="0.44" filter="url(#softBlur4)" />
+        <path d="M 272 956 C 282 1006, 281 1062, 266 1126 C 261 1072, 264 1008, 272 956 Z" fill="${r.dark}" opacity="0.36" filter="url(#softBlur4)" />
+        <path d="M 328 956 C 318 1006, 319 1062, 334 1126 C 339 1072, 336 1008, 328 956 Z" fill="${r.dark}" opacity="0.40" filter="url(#softBlur4)" />
       </g>
       <g id="feet-and-toes">
-        <ellipse cx="242" cy="1156" rx="5" ry="7" fill="${r.light}" opacity="0.52" filter="url(#softBlur2)" />
-        <ellipse cx="359" cy="1156" rx="5" ry="7" fill="${r.light}" opacity="0.45" filter="url(#softBlur2)" />
-        <path d="M 250 1152 C 248 1175, 244 1196, 241 1212" stroke="${r.light}" stroke-width="2.4" opacity="0.40" filter="url(#softBlur2)" fill="none" />
-        <path d="M 351 1152 C 353 1175, 357 1196, 360 1212" stroke="${r.light}" stroke-width="2.4" opacity="0.36" filter="url(#softBlur2)" fill="none" />
+        <ellipse cx="242" cy="1156" rx="5" ry="7" fill="${r.light}" opacity="0.54" filter="url(#softBlur2)" />
+        <ellipse cx="264" cy="1161" rx="3.5" ry="5" fill="${r.dark}" opacity="0.34" filter="url(#softBlur2)" />
+        <ellipse cx="359" cy="1156" rx="5" ry="7" fill="${r.light}" opacity="0.46" filter="url(#softBlur2)" />
+        <ellipse cx="337" cy="1161" rx="3.5" ry="5" fill="${r.dark}" opacity="0.34" filter="url(#softBlur2)" />
+        <path d="M 250 1152 C 248 1175, 244 1196, 241 1212" stroke="${r.light}" stroke-width="2.4" opacity="0.42" filter="url(#softBlur2)" fill="none" />
+        <path d="M 351 1152 C 353 1175, 357 1196, 360 1212" stroke="${r.light}" stroke-width="2.4" opacity="0.38" filter="url(#softBlur2)" fill="none" />
         <path d="M 267 1215 C 266 1222, 266 1228, 267 1233" stroke="${r.deep}" stroke-width="1.1" opacity="0.42" stroke-linecap="round" />
         <path d="M 255 1217 C 254 1223, 254 1229, 255 1234" stroke="${r.deep}" stroke-width="1.0" opacity="0.40" stroke-linecap="round" />
         <path d="M 243 1218 C 242 1224, 241 1229, 242 1233" stroke="${r.deep}" stroke-width="0.95" opacity="0.38" stroke-linecap="round" />
@@ -351,25 +376,27 @@ export function bodyAsset(p: AssetParams): string {
       </g>
     </g>
 
-    <g id="torso-and-neck">
+    <g id="torso-and-neck" mask="url(#torsoSeamlessMask)">
       <path d="${TORSO}" fill="url(#skinTorsoGrad)" />
       <g clip-path="url(#torsoClip)">
-        <path d="M 278 198 C 282 226, 281 244, 272 256 C 288 262, 312 262, 328 256 C 319 244, 318 226, 322 198 Z" fill="url(#skinNeckGrad)" opacity="0.64" />
-        <path d="M 276 196 C 286 213, 314 213, 324 196 C 320 213, 311 226, 300 227 C 289 226, 280 213, 276 196 Z" fill="${r.deep}" opacity="0.44" filter="url(#softBlur4)" />
-        <path d="M 284 218 C 289 238, 294 256, 298 268" stroke="${r.light}" stroke-width="2.1" opacity="0.42" filter="url(#softBlur2)" fill="none" />
-        <path d="M 316 218 C 311 238, 306 256, 302 268" stroke="${r.dark}" stroke-width="2.1" opacity="0.38" filter="url(#softBlur2)" fill="none" />
-        <ellipse cx="300" cy="272" rx="7" ry="4.5" fill="${r.dark}" opacity="0.40" filter="url(#softBlur2)" />
-        <path d="M 292 273 C 272 272, 246 266, 224 270" stroke="${r.light}" stroke-width="3.0" opacity="0.58" filter="url(#softBlur2)" fill="none" stroke-linecap="round" />
-        <path d="M 290 276 C 270 277, 248 271, 228 274" stroke="${r.dark}" stroke-width="2.3" opacity="0.32" filter="url(#softBlur2)" fill="none" stroke-linecap="round" />
-        <path d="M 308 273 C 328 272, 354 266, 376 270" stroke="${r.light}" stroke-width="3.0" opacity="0.48" filter="url(#softBlur2)" fill="none" stroke-linecap="round" />
-        <path d="M 310 276 C 330 277, 352 271, 372 274" stroke="${r.dark}" stroke-width="2.3" opacity="0.34" filter="url(#softBlur2)" fill="none" stroke-linecap="round" />
+        <path d="M 278 198 C 282 226, 281 244, 272 256 C 288 262, 312 262, 328 256 C 319 244, 318 226, 322 198 Z" fill="url(#skinNeckGrad)" opacity="0.68" />
+        <path d="M 276 196 C 286 214, 314 214, 324 196 C 320 214, 311 228, 300 229 C 289 228, 280 214, 276 196 Z" fill="${r.deep}" opacity="0.48" filter="url(#softBlur4)" />
+        <path d="M 284 218 C 289 238, 294 256, 298 268" stroke="${r.light}" stroke-width="2.2" opacity="0.44" filter="url(#softBlur2)" fill="none" />
+        <path d="M 316 218 C 311 238, 306 256, 302 268" stroke="${r.dark}" stroke-width="2.2" opacity="0.40" filter="url(#softBlur2)" fill="none" />
+        <ellipse cx="300" cy="272" rx="7" ry="4.5" fill="${r.dark}" opacity="0.44" filter="url(#softBlur2)" />
+        <path d="M 292 273 C 272 272, 246 266, 224 270" stroke="${r.hi}" stroke-width="2.8" opacity="0.54" filter="url(#softBlur2)" fill="none" stroke-linecap="round" />
+        <path d="M 290 276 C 270 277, 248 271, 228 274" stroke="${r.dark}" stroke-width="2.4" opacity="0.34" filter="url(#softBlur2)" fill="none" stroke-linecap="round" />
+        <path d="M 308 273 C 328 272, 354 266, 376 270" stroke="${r.hi}" stroke-width="2.8" opacity="0.44" filter="url(#softBlur2)" fill="none" stroke-linecap="round" />
+        <path d="M 310 276 C 330 277, 352 271, 372 274" stroke="${r.dark}" stroke-width="2.4" opacity="0.36" filter="url(#softBlur2)" fill="none" stroke-linecap="round" />
         <ellipse cx="211" cy="288" rx="18" ry="12" fill="url(#skinSpecular)" opacity="0.68" filter="url(#softBlur4)" transform="rotate(-18 211 288)" />
         <ellipse cx="389" cy="288" rx="16" ry="11" fill="url(#skinSpecular)" opacity="0.42" filter="url(#softBlur4)" transform="rotate(18 389 288)" />
         <ellipse cx="255" cy="382" rx="42" ry="44" fill="url(#bustLeftVol)" />
         <ellipse cx="345" cy="382" rx="42" ry="44" fill="url(#bustRightVol)" />
-        <path d="M 296 346 C 301 372, 301 398, 299 415 C 303 398, 304 372, 296 346 Z" fill="${r.deep}" opacity="0.45" filter="url(#softBlur2)" />
-        <path d="M 222 414 C 246 433, 277 431, 296 416 C 280 425, 249 426, 222 414 Z" fill="${r.deep}" opacity="0.36" filter="url(#softBlur4)" />
-        <path d="M 378 414 C 354 433, 323 431, 304 416 C 320 425, 351 426, 378 414 Z" fill="${r.deep}" opacity="0.40" filter="url(#softBlur4)" />
+        <ellipse cx="247" cy="368" rx="18" ry="12" fill="${r.hi}" opacity="0.30" filter="url(#softBlur4)" transform="rotate(-14 247 368)" />
+        <ellipse cx="342" cy="368" rx="16" ry="11" fill="${r.hi}" opacity="0.22" filter="url(#softBlur4)" transform="rotate(14 342 368)" />
+        <path d="M 296 346 C 301 372, 301 398, 299 415 C 303 398, 304 372, 296 346 Z" fill="${r.deep}" opacity="0.46" filter="url(#softBlur2)" />
+        <path d="M 222 414 C 246 433, 277 431, 296 416 C 280 425, 249 426, 222 414 Z" fill="${r.deep}" opacity="0.38" filter="url(#softBlur4)" />
+        <path d="M 378 414 C 354 433, 323 431, 304 416 C 320 425, 351 426, 378 414 Z" fill="${r.deep}" opacity="0.42" filter="url(#softBlur4)" />
         <path d="M 240 448 C 247 476, 246 504, 237 530 C 248 506, 255 478, 252 448 Z" fill="url(#skinSpecular)" opacity="0.54" filter="url(#softBlur8)" />
         <path d="M 360 448 C 353 476, 354 504, 363 530 C 373 504, 371 474, 360 448 Z" fill="${r.dark}" opacity="0.34" filter="url(#softBlur8)" />
         <path d="M 300 428 C 299 462, 299 488, 300 512" stroke="${r.dark}" stroke-width="3.2" opacity="0.22" filter="url(#softBlur4)" fill="none" />
@@ -388,26 +415,144 @@ export function bodyAsset(p: AssetParams): string {
       </g>
     </g>
 
+    <g id="arms-and-hands">
+      <path d="${armLeft}" fill="url(#skinArmLeftGrad)" />
+      ${leftArmDetails(pose, r)}
+      <path d="${ARM_RELAXED_RIGHT}" fill="url(#skinArmRightGrad)" />
+      <path d="M 420 314 C 427 354, 431 398, 428 438 C 423 404, 419 357, 413 316 Z" fill="url(#skinSpecular)" opacity="0.44" filter="url(#softBlur4)" />
+      <path d="M 405 354 C 401 400, 401 448, 406 506 C 400 492, 397 460, 398 436 C 398 404, 399 374, 405 354 Z" fill="${r.dark}" opacity="0.42" filter="url(#softBlur4)" />
+      <ellipse cx="416" cy="574" rx="10" ry="14" fill="url(#warmSubsurfaceGlow)" />
+      <path d="M 420 598 C 420 612, 420 624, 419 632" stroke="${r.deep}" stroke-width="1.0" opacity="0.42" stroke-linecap="round" />
+      <path d="M 410 596 C 408 610, 407 622, 407 630" stroke="${r.deep}" stroke-width="0.95" opacity="0.40" stroke-linecap="round" />
+      <ellipse cx="425" cy="631" rx="1.6" ry="2.5" fill="#FBE8E2" opacity="0.62" />
+      <ellipse cx="411" cy="632" rx="1.5" ry="2.3" fill="#FBE8E2" opacity="0.58" />
+      <ellipse cx="398" cy="619" rx="1.3" ry="1.9" fill="#FBE8E2" opacity="0.50" />
+    </g>
+
     <g id="head-base">
-      <path d="M 255 137 C 247 136, 245 148, 248 158 C 250 165, 255 167, 259 164 Z" fill="${r.dark}" />
+      <!-- Sculpted ears: outer helix, inner antihelix, recessed concha & soft lobe -->
+      <path d="M 255 137 C 247 136, 245 148, 248 158 C 250 165, 255 167, 259 164 Z" fill="${r.mid2}" />
+      <path d="M 254 140 C 249 140, 248 148, 250 156 C 252 160, 255 160, 256 156" fill="${r.deep}" opacity="0.58" />
+      <path d="M 253 141 C 249 142, 248 150, 250 157" stroke="${r.light}" stroke-width="1.2" opacity="0.55" fill="none" stroke-linecap="round" />
       <path d="M 345 137 C 353 136, 355 148, 352 158 C 350 165, 345 167, 341 164 Z" fill="${r.dark}" />
-      <path d="${FACE_OVAL}" fill="url(#skinTorsoGrad)" />
-      <ellipse cx="294" cy="108" rx="22" ry="12" fill="url(#skinSpecular)" opacity="0.62" filter="url(#softBlur4)" />
-      <ellipse cx="272" cy="146" rx="9" ry="4.2" fill="${r.light}" opacity="0.44" filter="url(#softBlur2)" transform="rotate(-12 272 146)" />
-      <ellipse cx="328" cy="146" rx="9" ry="4.2" fill="${r.light}" opacity="0.30" filter="url(#softBlur2)" transform="rotate(12 328 146)" />
-      <path d="M 339 135 C 340 162, 331 184, 308 202 C 325 190, 342 168, 345 135 Z" fill="${r.dark}" opacity="0.34" filter="url(#softBlur4)" />
-      <ellipse cx="300" cy="197" rx="8" ry="4.5" fill="${r.light}" opacity="0.42" filter="url(#softBlur2)" />
+      <path d="M 346 140 C 351 140, 352 148, 350 156 C 348 160, 345 160, 344 156" fill="${r.deep}" opacity="0.62" />
+      <path d="M 347 141 C 351 142, 352 150, 350 157" stroke="${r.mid}" stroke-width="1.1" opacity="0.45" fill="none" stroke-linecap="round" />
+
+      <path d="${FACE_OVAL}" fill="url(#skinFaceGrad)" />
+      <g clip-path="url(#faceClip)">
+        <!-- Forehead ambient studio softbox + subtle temple planes -->
+        <ellipse cx="295" cy="106" rx="22" ry="11" fill="url(#skinSpecular)" opacity="0.62" filter="url(#softBlur4)" />
+        <ellipse cx="261" cy="116" rx="7" ry="14" fill="${r.dark}" opacity="0.24" filter="url(#softBlur4)" />
+        <ellipse cx="339" cy="116" rx="7" ry="14" fill="${r.dark}" opacity="0.30" filter="url(#softBlur4)" />
+        <!-- Orbital socket & infraorbital plane softness -->
+        <ellipse cx="280" cy="133" rx="13" ry="7" fill="${r.dark}" opacity="0.16" filter="url(#softBlur4)" />
+        <ellipse cx="320" cy="133" rx="13" ry="7" fill="${r.dark}" opacity="0.18" filter="url(#softBlur4)" />
+        <!-- Zygomatic cheekbone highlights & sub-malar sculpting -->
+        <ellipse cx="271" cy="146" rx="10" ry="4.4" fill="${r.hi}" opacity="0.42" filter="url(#softBlur2)" transform="rotate(-14 271 146)" />
+        <ellipse cx="329" cy="146" rx="10" ry="4.4" fill="${r.light}" opacity="0.32" filter="url(#softBlur2)" transform="rotate(14 329 146)" />
+        <path d="M 262 156 C 266 168, 274 176, 282 180" stroke="${r.dark}" stroke-width="4.5" opacity="0.16" filter="url(#softBlur4)" fill="none" />
+        <path d="M 338 156 C 334 168, 326 176, 318 180" stroke="${r.dark}" stroke-width="5.0" opacity="0.22" filter="url(#softBlur4)" fill="none" />
+        <!-- Jawline contour & mental chin highlight -->
+        <path d="M 339 135 C 340 162, 331 184, 308 202 C 325 190, 342 168, 345 135 Z" fill="${r.dark}" opacity="0.36" filter="url(#softBlur4)" />
+        <path d="M 271 186 C 280 198, 290 204, 300 205 C 310 204, 320 198, 329 186" stroke="${r.light}" stroke-width="1.6" opacity="0.34" filter="url(#softBlur2)" fill="none" />
+        <ellipse cx="300" cy="196.5" rx="7.5" ry="4.2" fill="${r.hi}" opacity="0.40" filter="url(#softBlur2)" />
+      </g>
     </g>`);
 }
 
-/** Face features layer: brows, eyes, sculpted nose, sculpted lips, natural blush. */
+function realisticEye(cx: number, dir: -1 | 1, iris: string, r: Ramp): string {
+  const innerX = 300 + dir * 9.8;
+  const outerX = 300 + dir * 29.8;
+  const midX = cx;
+  const irisBright = shade(iris, 0.36);
+  const irisDeep = shade(iris, -0.52);
+
+  // Crisp realistic iris fibers around pupil
+  const fibers = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
+    .map((deg) => {
+      const rad = (deg * Math.PI) / 180;
+      const x1 = (cx + Math.cos(rad) * 2.1).toFixed(2);
+      const y1 = (135.5 + Math.sin(rad) * 2.1).toFixed(2);
+      const x2 = (cx + Math.cos(rad) * 3.6).toFixed(2);
+      const y2 = (135.5 + Math.sin(rad) * 3.6).toFixed(2);
+      return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${irisBright}" stroke-width="0.35" opacity="0.52" />`;
+    })
+    .join('');
+
+  // Delicate natural upper lashes (visible even before mascara)
+  const lashOffsets = [-7.2, -5.0, -2.8, -0.5, 1.8, 4.1, 6.2, 8.0];
+  const lashes = lashOffsets
+    .map((dx, idx) => {
+      const lx = cx + dir * dx;
+      const ly = 132.2 + Math.abs(dx) * 0.34;
+      const tipX = lx + dir * (0.4 + idx * 0.25);
+      const tipY = ly - (1.7 + idx * 0.14);
+      return `<path d="M ${lx.toFixed(1)} ${ly.toFixed(1)} Q ${(lx + dir * 0.3).toFixed(1)} ${(ly - 1.1).toFixed(1)}, ${tipX.toFixed(1)} ${tipY.toFixed(1)}" stroke="#1D120D" stroke-width="0.48" opacity="0.72" fill="none" stroke-linecap="round" />`;
+    })
+    .join('');
+
+  const eyeShape = `M ${innerX.toFixed(1)} 136 C ${(300 + dir * 15).toFixed(1)} 130.9, ${(300 + dir * 24.5).toFixed(1)} 130.9, ${outerX.toFixed(1)} 135.8 C ${(300 + dir * 24.5).toFixed(1)} 139.6, ${(300 + dir * 15).toFixed(1)} 139.6, ${innerX.toFixed(1)} 136 Z`;
+
+  return `
+    <!-- Upper eyelid crease & lid fullness -->
+    <path d="M ${(300 + dir * 10.5).toFixed(1)} 132 C ${(300 + dir * 16).toFixed(1)} 127.2, ${(300 + dir * 24.5).toFixed(1)} 127.4, ${(300 + dir * 29.8).toFixed(1)} 132.2" stroke="${r.dark}" stroke-width="1.15" opacity="0.52" fill="none" stroke-linecap="round" />
+    <path d="M ${(300 + dir * 13).toFixed(1)} 130.2 C ${(300 + dir * 18).toFixed(1)} 128.8, ${(300 + dir * 23).toFixed(1)} 128.9, ${(300 + dir * 27).toFixed(1)} 130.8" stroke="${r.light}" stroke-width="1.2" opacity="0.34" fill="none" stroke-linecap="round" />
+    <!-- Sclera with corner & upper-lid shadow shading -->
+    <path d="${eyeShape}" fill="url(#scleraGrad)" />
+    <!-- Tear duct caruncle -->
+    <ellipse cx="${(innerX + dir * 0.9).toFixed(1)}" cy="136.0" rx="1.1" ry="0.7" fill="#D58781" opacity="0.78" />
+    <!-- Clipped iris + upper-lid cast shadow -->
+    <g clip-path="url(#eyeClip${dir < 0 ? 'L' : 'R'})">
+      <circle cx="${midX}" cy="135.5" r="4.15" fill="url(#irisGradFace)" stroke="${irisDeep}" stroke-width="0.55" />
+      ${fibers}
+      <circle cx="${midX}" cy="135.5" r="1.8" fill="#0F0907" />
+      <!-- Upper lid cast shadow across top of eye & iris -->
+      <path d="M ${(innerX - dir * 1).toFixed(1)} 130.5 L ${(outerX + dir * 1).toFixed(1)} 130.5 L ${(outerX + dir * 1).toFixed(1)} 133.5 C ${(300 + dir * 24).toFixed(1)} 132.1, ${(300 + dir * 15).toFixed(1)} 132.1, ${(innerX - dir * 1).toFixed(1)} 133.5 Z" fill="#2B1A14" opacity="0.22" filter="url(#softBlur1)" />
+      <!-- Dual corneal catchlights -->
+      <ellipse cx="${(midX - 1.25).toFixed(2)}" cy="134.1" rx="1.15" ry="0.9" fill="#FFFFFF" opacity="0.96" />
+      <circle cx="${(midX + 1.25).toFixed(2)}" cy="136.6" r="0.45" fill="#FFFFFF" opacity="0.76" />
+    </g>
+    <!-- Upper lash root & lower moist waterline -->
+    <path d="M ${(innerX - dir * 0.6).toFixed(1)} 135.6 C ${(300 + dir * 15).toFixed(1)} 130.5, ${(300 + dir * 25).toFixed(1)} 130.5, ${(outerX + dir * 0.8).toFixed(1)} 135.8" stroke="#1B110D" stroke-width="1.65" fill="none" stroke-linecap="round" />
+    <path d="M ${(innerX + dir * 1.5).toFixed(1)} 137.4 C ${(300 + dir * 16).toFixed(1)} 139.2, ${(300 + dir * 24).toFixed(1)} 139.2, ${(outerX - dir * 1).toFixed(1)} 136.8" stroke="#FFF4EF" stroke-width="0.7" opacity="0.62" fill="none" />
+    <path d="M ${(innerX + dir * 2).toFixed(1)} 138.3 C ${(300 + dir * 16).toFixed(1)} 140.4, ${(300 + dir * 24).toFixed(1)} 140.2, ${(outerX - dir * 0.8).toFixed(1)} 137.4" stroke="${r.dark}" stroke-width="0.9" opacity="0.48" fill="none" />
+    ${lashes}`;
+}
+
+function realisticBrow(dir: -1 | 1, toneBase: string): string {
+  const browFill = shade(toneBase, -0.58);
+  const browHair = shade(toneBase, -0.68);
+  const p0x = 300 + dir * 8.5;
+  const p1x = 300 + dir * 18;
+  const p2x = 300 + dir * 26;
+  const p3x = 300 + dir * 33;
+
+  const strokes: string[] = [];
+  for (let i = 0; i < 8; i++) {
+    const t = i / 7;
+    const bx = 300 + dir * (9.5 + t * 22);
+    const by = 123.8 - Math.sin(t * Math.PI * 0.85) * 3.4;
+    const tx = bx + dir * (0.8 + t * 2.2);
+    const ty = by - (2.4 - t * 1.1);
+    strokes.push(
+      `<line x1="${bx.toFixed(1)}" y1="${by.toFixed(1)}" x2="${tx.toFixed(1)}" y2="${ty.toFixed(1)}" stroke="${browHair}" stroke-width="0.65" opacity="0.62" stroke-linecap="round" />`,
+    );
+  }
+
+  return (
+    `<path d="M ${p3x} 124.8 C ${p2x} 119.0, ${p1x} 119.2, ${p0x} 123.8 C ${p1x} 122.0, ${p2x} 121.8, ${p3x} 124.8 Z" fill="${browFill}" opacity="0.64" filter="url(#softBlur1)" />` +
+    strokes.join('')
+  );
+}
+
+/** Face features layer: photorealistic brows, eyes, sculpted nose, 3D lips, natural blush. */
 export function faceAsset(p: AssetParams): string {
   const tone = p.skinTone ?? FALLBACK_TONE;
   const r = ramp(tone);
   const iris = p.iris ?? '#4A2E1B';
 
   const freckles = p.freckles
-    ? `<g fill="${r.deep}" opacity="0.5">` +
+    ? `<g fill="${r.deep}" opacity="0.46">` +
       [
         [265, 148],
         [272, 156],
@@ -420,75 +565,93 @@ export function faceAsset(p: AssetParams): string {
         [328, 156],
         [335, 148],
       ]
-        .map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.2"/>`)
+        .map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.1"/>`)
         .join('') +
       `</g>`
     : '';
 
-  const beautyMark = p.beautyMark ? `<circle cx="312" cy="184" r="1.6" fill="${r.deep}" opacity="0.85"/>` : '';
+  const beautyMark = p.beautyMark ? `<circle cx="312" cy="184" r="1.5" fill="${r.deep}" opacity="0.82"/>` : '';
+
+  const eyeClipL = `M 270.2 136 C 275.5 130.9, 285 130.9, 290.2 135.8 C 285 139.6, 275.5 139.6, 270.2 136 Z`;
+  const eyeClipR = `M 309.8 136 C 315 130.9, 324.5 130.9, 329.8 135.8 C 324.5 139.6, 315 139.6, 309.8 136 Z`;
 
   return toUri(`
     <defs>${BLUR_FILTERS}
+      <clipPath id="eyeClipL"><path d="${eyeClipL}" /></clipPath>
+      <clipPath id="eyeClipR"><path d="${eyeClipR}" /></clipPath>
       <radialGradient id="cheekBlush" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="#D97B6C" stop-opacity="0.38" />
-        <stop offset="65%" stop-color="#D97B6C" stop-opacity="0.12" />
-        <stop offset="100%" stop-color="#D97B6C" stop-opacity="0" />
+        <stop offset="0%" stop-color="#D46E63" stop-opacity="0.34" />
+        <stop offset="65%" stop-color="#D46E63" stop-opacity="0.10" />
+        <stop offset="100%" stop-color="#D46E63" stop-opacity="0" />
       </radialGradient>
-      <radialGradient id="irisGradFace" cx="45%" cy="42%" r="55%">
-        <stop offset="0%" stop-color="${shade(iris, 0.3)}" />
-        <stop offset="52%" stop-color="${iris}" />
-        <stop offset="88%" stop-color="${shade(iris, -0.45)}" />
-        <stop offset="100%" stop-color="${shade(iris, -0.6)}" />
+      <radialGradient id="scleraGrad" cx="50%" cy="55%" r="58%">
+        <stop offset="0%" stop-color="#FCFBF9" />
+        <stop offset="72%" stop-color="#F2ECE7" />
+        <stop offset="100%" stop-color="#DED3CC" />
+      </radialGradient>
+      <radialGradient id="irisGradFace" cx="46%" cy="44%" r="55%">
+        <stop offset="0%" stop-color="${shade(iris, 0.34)}" />
+        <stop offset="48%" stop-color="${iris}" />
+        <stop offset="84%" stop-color="${shade(iris, -0.44)}" />
+        <stop offset="100%" stop-color="${shade(iris, -0.62)}" />
       </radialGradient>
       <linearGradient id="lipUpperGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stop-color="${shade(tone.base, -0.52)}" />
-        <stop offset="65%" stop-color="${shade(tone.base, -0.34)}" />
-        <stop offset="100%" stop-color="${shade(tone.base, -0.52)}" />
+        <stop offset="0%" stop-color="${r.lipLine}" />
+        <stop offset="48%" stop-color="${r.lipUpper}" />
+        <stop offset="100%" stop-color="${r.lipLine}" />
       </linearGradient>
-      <linearGradient id="lipLowerGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stop-color="${shade(tone.base, -0.34)}" />
-        <stop offset="45%" stop-color="${shade(tone.base, -0.1)}" />
-        <stop offset="100%" stop-color="${shade(tone.base, -0.52)}" />
-      </linearGradient>
+      <radialGradient id="lipLowerGrad" cx="50%" cy="40%" r="60%">
+        <stop offset="0%" stop-color="${shade(r.lipLower, 0.16)}" />
+        <stop offset="56%" stop-color="${r.lipLower}" />
+        <stop offset="100%" stop-color="${r.lipLine}" />
+      </radialGradient>
     </defs>
 
-    <ellipse cx="273" cy="153" rx="14" ry="10" fill="url(#cheekBlush)" />
-    <ellipse cx="327" cy="153" rx="14" ry="10" fill="url(#cheekBlush)" />
+    <ellipse cx="273" cy="153" rx="14" ry="9.5" fill="url(#cheekBlush)" />
+    <ellipse cx="327" cy="153" rx="14" ry="9.5" fill="url(#cheekBlush)" />
 
     <g id="nose">
-      <path d="M 297 131 C 296 143, 296 154, 295 161 C 298 164, 302 164, 305 161 C 304 154, 304 143, 303 131 Z" fill="url(#skinSpecular)" opacity="0.54" filter="url(#softBlur2)" />
-      <path d="M 303 134 C 306 146, 307 156, 305 162 C 303 165, 299 166, 295 163" stroke="${r.dark}" stroke-width="1.8" opacity="0.34" filter="url(#softBlur2)" fill="none" stroke-linecap="round" />
-      <ellipse cx="294.5" cy="162.5" rx="2.1" ry="1.2" fill="${r.deep}" opacity="0.36" />
-      <ellipse cx="305.5" cy="162.5" rx="2.1" ry="1.2" fill="${r.deep}" opacity="0.38" />
-      <ellipse cx="299.5" cy="160.2" rx="2.6" ry="2.0" fill="${r.light}" opacity="0.62" />
+      <!-- Lateral nasal sidewalls -->
+      <path d="M 295 134 C 294 146, 293 155, 292 161" stroke="${r.dark}" stroke-width="1.4" opacity="0.22" filter="url(#softBlur2)" fill="none" />
+      <path d="M 304 134 C 306 146, 307 156, 305.5 162 C 303 165, 299 166, 294.5 163" stroke="${r.dark}" stroke-width="1.9" opacity="0.34" filter="url(#softBlur2)" fill="none" stroke-linecap="round" />
+      <!-- Bridge light plane & nasal tip -->
+      <path d="M 298.5 131 L 301.5 131 L 302 159 L 298 159 Z" fill="${r.hi}" opacity="0.38" filter="url(#softBlur2)" />
+      <ellipse cx="300" cy="159.5" rx="3.2" ry="2.4" fill="${r.hi}" opacity="0.52" filter="url(#softBlur1)" />
+      <!-- Subtle nostrils & alar wings -->
+      <ellipse cx="294.5" cy="162.5" rx="2.0" ry="1.1" fill="${r.deep}" opacity="0.40" />
+      <ellipse cx="305.5" cy="162.5" rx="2.0" ry="1.1" fill="${r.deep}" opacity="0.42" />
+      <path d="M 291.5 160 C 291 162, 292 164, 294 164.5" stroke="${r.light}" stroke-width="0.9" opacity="0.42" fill="none" />
+      <path d="M 308.5 160 C 309 162, 308 164, 306 164.5" stroke="${r.light}" stroke-width="0.8" opacity="0.32" fill="none" />
     </g>
 
     <g id="eyes-and-brows">
-      <path d="M 267 125 C 274 119, 284 119, 292 124 C 284 122, 275 122, 267 125 Z" fill="${shade(tone.base, -0.55)}" opacity="0.82" />
-      <path d="M 333 125 C 326 119, 316 119, 308 124 C 316 122, 325 122, 333 125 Z" fill="${shade(tone.base, -0.55)}" opacity="0.82" />
-      <path d="M 271 131 C 277 127, 286 128, 291 132" stroke="${r.dark}" stroke-width="1.2" opacity="0.48" fill="none" stroke-linecap="round" />
-      <path d="M 329 131 C 323 127, 314 128, 309 132" stroke="${r.dark}" stroke-width="1.2" opacity="0.48" fill="none" stroke-linecap="round" />
-      <path d="M 271 136 C 276 131, 285 131, 290 136 C 285 139.6, 276 139.6, 271 136 Z" fill="#F8F5F2" />
-      <circle cx="280.8" cy="135.5" r="4.0" fill="url(#irisGradFace)" />
-      <circle cx="280.8" cy="135.5" r="1.9" fill="#110906" />
-      <circle cx="279.6" cy="134.2" r="1.05" fill="#FFFFFF" opacity="0.95" />
-      <path d="M 269.5 135.5 C 275 130.5, 285 130.5, 290.5 136" stroke="#1E130E" stroke-width="1.8" fill="none" stroke-linecap="round" />
-      <path d="M 272 138 C 277 140, 284 140, 289 137.5" stroke="${r.dark}" stroke-width="0.9" opacity="0.48" fill="none" />
-      <path d="M 310 136 C 315 131, 324 131, 329 136 C 324 139.6, 315 139.6, 310 136 Z" fill="#F8F5F2" />
-      <circle cx="319.2" cy="135.5" r="4.0" fill="url(#irisGradFace)" />
-      <circle cx="319.2" cy="135.5" r="1.9" fill="#110906" />
-      <circle cx="318.0" cy="134.2" r="1.05" fill="#FFFFFF" opacity="0.95" />
-      <path d="M 309.5 136 C 315 130.5, 325 130.5, 330.5 135.5" stroke="#1E130E" stroke-width="1.8" fill="none" stroke-linecap="round" />
-      <path d="M 311 137.5 C 316 140, 323 140, 328 138" stroke="${r.dark}" stroke-width="0.9" opacity="0.48" fill="none" />
+      ${realisticBrow(-1, tone.base)}
+      ${realisticBrow(1, tone.base)}
+      ${realisticEye(280.8, -1, iris, r)}
+      ${realisticEye(319.2, 1, iris, r)}
     </g>
 
     <g id="lips">
-      <path d="M 298 166 L 298 174 M 302 166 L 302 174" stroke="${r.light}" stroke-width="1.0" opacity="0.35" />
+      <!-- Philtrum columns & cupid's bow vermilion ridge -->
+      <path d="M 297.8 166 L 298.2 174 M 302.2 166 L 301.8 174" stroke="${r.light}" stroke-width="0.95" opacity="0.38" />
+      <path d="M 294 174.2 C 297 172.5, 299 173.4, 300 175 C 301 173.4, 303 172.5, 306 174.2" stroke="${r.hi}" stroke-width="0.8" opacity="0.52" fill="none" />
+      <!-- Sculpted upper & lower lips -->
       <path d="M 285 178 C 290 174, 295 173, 300 175.5 C 305 173, 310 174, 315 178 C 309 179.5, 304 179.5, 300 179 C 296 179.5, 291 179.5, 285 178 Z" fill="url(#lipUpperGrad)" />
-      <path d="M 286 178.5 C 293 179.5, 307 179.5, 314 178.5 C 311 186, 305 188.5, 300 188.5 C 295 188.5, 289 186, 286 178.5 Z" fill="url(#lipLowerGrad)" />
-      <path d="M 286 178.4 C 293 179.6, 307 179.6, 314 178.4" stroke="${shade(tone.base, -0.52)}" stroke-width="1.0" opacity="0.72" fill="none" stroke-linecap="round" />
-      <path d="M 293 190.5 C 297 192.5, 303 192.5, 307 190.5" stroke="${r.dark}" stroke-width="1.8" opacity="0.34" filter="url(#softBlur2)" fill="none" />
-      <ellipse cx="299" cy="183.5" rx="5.0" ry="1.3" fill="#FFFFFF" opacity="0.52" filter="url(#softBlur2)" />
+      <path d="M 286 178.5 C 293 179.5, 307 179.5, 314 178.5 C 311 186, 305 188.6, 300 188.6 C 295 188.6, 289 186, 286 178.5 Z" fill="url(#lipLowerGrad)" />
+      <!-- Mouth parting crease & corner depth -->
+      <path d="M 285.5 178.2 C 293 179.6, 307 179.6, 314.5 178.2" stroke="${r.lipLine}" stroke-width="1.05" opacity="0.78" fill="none" stroke-linecap="round" />
+      <circle cx="285.3" cy="178.1" r="0.65" fill="${r.deep}" opacity="0.55" />
+      <circle cx="314.7" cy="178.1" r="0.65" fill="${r.deep}" opacity="0.55" />
+      <!-- Natural vertical lip micro-creases & moist speculars -->
+      <g stroke="${r.lipLine}" stroke-width="0.45" opacity="0.28">
+        <line x1="295" y1="181" x2="294.5" y2="186" />
+        <line x1="300" y1="181" x2="300" y2="187" />
+        <line x1="305" y1="181" x2="305.5" y2="186" />
+      </g>
+      <ellipse cx="299.5" cy="183.4" rx="4.6" ry="1.25" fill="#FFFFFF" opacity="0.46" filter="url(#softBlur1)" />
+      <ellipse cx="298.5" cy="183.0" rx="1.6" ry="0.55" fill="#FFFFFF" opacity="0.62" />
+      <!-- Mentolabial shadow under lower lip -->
+      <path d="M 293 190.6 C 297 192.6, 303 192.6, 307 190.6" stroke="${r.dark}" stroke-width="1.9" opacity="0.36" filter="url(#softBlur2)" fill="none" />
     </g>
 
     ${freckles}

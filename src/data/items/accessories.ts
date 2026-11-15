@@ -1,4 +1,4 @@
-import type { AccessoryItem, PaletteFamily } from '@/game/types';
+import type { AccessoryItem, PaletteFamily, Variant } from '@/game/types';
 
 /**
  * Accessory catalog, migrated to the accessory generator library in
@@ -25,7 +25,12 @@ function metalVariant(id: string, metal: 'gold' | 'silver' | 'rose'): AccessoryI
   ];
 }
 
-function colorVariant(id: string, color: string, color2?: string): AccessoryItem['variants'] {
+function colorVariant(
+  id: string,
+  color: string,
+  color2?: string,
+  name = 'Signature',
+): Variant {
   const family: PaletteFamily = (() => {
     if (color === 'gold' || color === 'rose') return 'warm';
     if (color === 'silver') return 'cool';
@@ -43,14 +48,16 @@ function colorVariant(id: string, color: string, color2?: string): AccessoryItem
     if (l < 0.42 && s > 0.45) return 'jewel';
     return 'cool';
   })();
-  return [
-    {
-      id,
-      name: 'Signature',
-      colors: color2 ? { primary: color, secondary: color2 } : { primary: color },
-      family,
-    },
-  ];
+  return {
+    id,
+    name,
+    colors: color2 ? { primary: color, secondary: color2 } : { primary: color },
+    family,
+  };
+}
+
+function colorVariants(id: string, color: string, color2?: string): AccessoryItem['variants'] {
+  return [colorVariant(id, color, color2)];
 }
 
 export const ACCESSORY_ITEMS: AccessoryItem[] = [
@@ -63,7 +70,11 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['casual', 'corporate'],
     unlock: { type: 'free' },
     asset: 'bag_leather_tote',
-    variants: colorVariant('signature', '#7d492d'),
+    variants: [
+      colorVariant('cognac', '#7d492d', undefined, 'Cognac'),
+      colorVariant('noir', '#221d24', undefined, 'Noir'),
+      colorVariant('camel', '#b58d63', undefined, 'Camel'),
+    ],
   },
   {
     id: 'bag_quilted_crossbody',
@@ -71,9 +82,13 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     category: 'accessory',
     slot: 'bag',
     tags: ['formal', 'evening', 'glam'],
-    unlock: { type: 'coins', cost: 30 },
+    unlock: { type: 'free' },
     asset: 'bag_quilted_crossbody',
-    variants: colorVariant('signature', '#1e1b22'),
+    variants: [
+      colorVariant('noir', '#1e1b22', undefined, 'Noir'),
+      colorVariant('ivory', '#ece3d5', undefined, 'Pearl Ivory'),
+      colorVariant('crimson', '#981f33', undefined, 'Crimson'),
+    ],
   },
   {
     id: 'bag_mini_satchel',
@@ -83,7 +98,11 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['corporate', 'girly'],
     unlock: { type: 'free' },
     asset: 'bag_mini_satchel',
-    variants: colorVariant('signature', '#a83344'),
+    variants: [
+      colorVariant('cherry', '#a83344', undefined, 'Cherry'),
+      colorVariant('blush', '#deb2bc', undefined, 'Blush'),
+      colorVariant('noir', '#221d24', undefined, 'Noir'),
+    ],
   },
   {
     id: 'bag_beaded_clutch',
@@ -93,7 +112,11 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['evening', 'formal', 'romantic'],
     unlock: { type: 'free' },
     asset: 'bag_beaded_clutch',
-    variants: colorVariant('signature', '#e6d8be'),
+    variants: [
+      colorVariant('pearl', '#e6d8be', undefined, 'Champagne Pearl'),
+      colorVariant('noir', '#242028', undefined, 'Obsidian'),
+      colorVariant('rose', '#d9a4af', undefined, 'Rosewater'),
+    ],
   },
   {
     id: 'bag_metallic_baguette',
@@ -101,9 +124,13 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     category: 'accessory',
     slot: 'bag',
     tags: ['evening', 'metallic', 'glam'],
-    unlock: { type: 'coins', cost: 35 },
+    unlock: { type: 'free' },
     asset: 'bag_metallic_baguette',
-    variants: colorVariant('signature', '#c8cfd6'),
+    variants: [
+      colorVariant('silver', '#c8cfd6', undefined, 'Chrome Silver'),
+      colorVariant('gold', '#d4ad54', undefined, 'Molten Gold'),
+      colorVariant('noir', '#26222c', undefined, 'Patent Noir'),
+    ],
   },
   {
     id: 'bag_slouchy_hobo',
@@ -113,7 +140,11 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['casual', 'boho'],
     unlock: { type: 'free' },
     asset: 'bag_slouchy_hobo',
-    variants: colorVariant('signature', '#8c6244'),
+    variants: [
+      colorVariant('tobacco', '#8c6244', undefined, 'Tobacco Suede'),
+      colorVariant('olive', '#58644f', undefined, 'Olive'),
+      colorVariant('noir', '#272329', undefined, 'Noir'),
+    ],
   },
   {
     id: 'bag_straw_tote',
@@ -123,7 +154,10 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['beach', 'resort', 'summer'],
     unlock: { type: 'free' },
     asset: 'bag_straw_tote',
-    variants: colorVariant('signature', '#d8be8e', '#2f5a78'),
+    variants: [
+      colorVariant('navy', '#d8be8e', '#2f5a78', 'Natural & Navy'),
+      colorVariant('terracotta', '#d8be8e', '#b5563c', 'Natural & Coral'),
+    ],
   },
   {
     id: 'bag_bucket_bag',
@@ -133,7 +167,11 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['casual', 'boho'],
     unlock: { type: 'free' },
     asset: 'bag_bucket_bag',
-    variants: colorVariant('signature', '#3e4e44'),
+    variants: [
+      colorVariant('forest', '#3e4e44', undefined, 'Forest'),
+      colorVariant('saddle', '#8a5534', undefined, 'Saddle'),
+      colorVariant('noir', '#242026', undefined, 'Noir'),
+    ],
   },
 
   // ---------- Sunglasses ----------
@@ -145,7 +183,7 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['glam', 'edgy'],
     unlock: { type: 'free' },
     asset: 'shades_cateye',
-    variants: colorVariant('signature', '#1e191e', '#261e28'),
+    variants: colorVariants('signature', '#1e191e', '#261e28'),
   },
   {
     id: 'shades_aviator',
@@ -165,7 +203,7 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['glam', 'bold'],
     unlock: { type: 'free' },
     asset: 'shades_square',
-    variants: colorVariant('signature', '#5a3520', '#3d2518'),
+    variants: colorVariants('signature', '#5a3520', '#3d2518'),
   },
   {
     id: 'shades_retro_oval',
@@ -175,7 +213,7 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['girly', 'casual', 'minimal'],
     unlock: { type: 'free' },
     asset: 'shades_retro_oval',
-    variants: colorVariant('signature', '#f4efe6', '#222026'),
+    variants: colorVariants('signature', '#f4efe6', '#222026'),
   },
   {
     id: 'shades_round_tortoise',
@@ -185,7 +223,7 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['boho', 'romantic'],
     unlock: { type: 'free' },
     asset: 'shades_round_tortoise',
-    variants: colorVariant('signature', '#6e3d1e', '#382a1e'),
+    variants: colorVariants('signature', '#6e3d1e', '#382a1e'),
   },
   {
     id: 'shades_hex_rose',
@@ -205,7 +243,7 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['sporty', 'minimal'],
     unlock: { type: 'free' },
     asset: 'shades_rimless_shield',
-    variants: colorVariant('signature', '#d97a96'),
+    variants: colorVariants('signature', '#d97a96'),
   },
 
   // ---------- Earrings ----------
@@ -217,7 +255,11 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['casual', 'resort'],
     unlock: { type: 'free' },
     asset: 'ear_gold_hoops',
-    variants: metalVariant('gold', 'gold'),
+    variants: [
+      { id: 'gold', name: 'Gold', colors: { primary: 'gold' }, family: 'warm' },
+      { id: 'silver', name: 'Silver', colors: { primary: 'silver' }, family: 'cool' },
+      { id: 'rose', name: 'Rose', colors: { primary: 'rose' }, family: 'warm' },
+    ],
   },
   {
     id: 'ear_pearl_drops',
@@ -227,7 +269,10 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['formal', 'romantic'],
     unlock: { type: 'free' },
     asset: 'ear_pearl_drops',
-    variants: metalVariant('gold', 'gold'),
+    variants: [
+      { id: 'gold', name: 'Gold', colors: { primary: 'gold' }, family: 'warm' },
+      { id: 'silver', name: 'Silver', colors: { primary: 'silver' }, family: 'cool' },
+    ],
   },
   {
     id: 'ear_crystal_chandelier',
@@ -235,9 +280,9 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     category: 'accessory',
     slot: 'earrings',
     tags: ['evening', 'glam', 'formal'],
-    unlock: { type: 'coins', cost: 30 },
+    unlock: { type: 'free' },
     asset: 'ear_crystal_chandelier',
-    variants: colorVariant('signature', '#d8f0ff'),
+    variants: colorVariants('signature', '#d8f0ff'),
   },
   {
     id: 'ear_teardrop_studs',
@@ -257,7 +302,7 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['evening', 'bold'],
     unlock: { type: 'free' },
     asset: 'ear_emerald_huggies',
-    variants: colorVariant('signature', '#1e7a52'),
+    variants: colorVariants('signature', '#1e7a52'),
   },
   {
     id: 'ear_chain_links',
@@ -319,7 +364,7 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['edgy', 'evening', 'bold'],
     unlock: { type: 'free' },
     asset: 'neck_velvet_choker',
-    variants: colorVariant('signature', '#1e1922'),
+    variants: colorVariants('signature', '#1e1922'),
   },
   {
     id: 'neck_cuban_collar',
@@ -327,7 +372,7 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     category: 'accessory',
     slot: 'necklace',
     tags: ['edgy', 'bold'],
-    unlock: { type: 'coins', cost: 30 },
+    unlock: { type: 'free' },
     asset: 'neck_cuban_collar',
     variants: metalVariant('gold', 'gold'),
   },
@@ -351,6 +396,19 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     asset: 'neck_heart_locket',
     variants: metalVariant('rose', 'rose'),
   },
+  {
+    id: 'neck_coral_beads',
+    name: 'Edo Coral Bead Collar',
+    category: 'accessory',
+    slot: 'necklace',
+    tags: ['nigerian', 'traditional', 'formal', 'bold'],
+    unlock: { type: 'free' },
+    asset: 'neck_coral_beads',
+    variants: [
+      colorVariant('coral', '#c83424', undefined, 'Royal Coral'),
+      colorVariant('deep', '#8f1b18', undefined, 'Deep Oxblood'),
+    ],
+  },
 
   // ---------- Wristwatches ----------
   {
@@ -361,7 +419,7 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['corporate', 'minimal'],
     unlock: { type: 'free' },
     asset: 'watch_gold_classic',
-    variants: colorVariant('signature', '#f7f1e3'),
+    variants: colorVariants('signature', '#f7f1e3'),
   },
   {
     id: 'watch_silver_chrono',
@@ -371,7 +429,7 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['sporty', 'casual'],
     unlock: { type: 'free' },
     asset: 'watch_silver_chrono',
-    variants: colorVariant('signature', '#1e2c44'),
+    variants: colorVariants('signature', '#1e2c44'),
   },
   {
     id: 'watch_rose_mesh',
@@ -381,7 +439,7 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['girly', 'romantic'],
     unlock: { type: 'free' },
     asset: 'watch_rose_mesh',
-    variants: colorVariant('signature', '#fff5f3'),
+    variants: colorVariants('signature', '#fff5f3'),
   },
   {
     id: 'watch_leather_tank',
@@ -391,7 +449,7 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['corporate', 'casual'],
     unlock: { type: 'free' },
     asset: 'watch_leather_tank',
-    variants: colorVariant('signature', '#3b2416'),
+    variants: colorVariants('signature', '#3b2416'),
   },
   {
     id: 'watch_diamond_bezel',
@@ -399,9 +457,9 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     category: 'accessory',
     slot: 'watch',
     tags: ['formal', 'evening', 'glam'],
-    unlock: { type: 'coins', cost: 35 },
+    unlock: { type: 'free' },
     asset: 'watch_diamond_bezel',
-    variants: colorVariant('signature', '#eef6fc'),
+    variants: colorVariants('signature', '#eef6fc'),
   },
   {
     id: 'watch_ceramic_sport',
@@ -411,7 +469,7 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['sporty', 'minimal'],
     unlock: { type: 'free' },
     asset: 'watch_ceramic_sport',
-    variants: colorVariant('signature', '#f2efe9'),
+    variants: colorVariants('signature', '#f2efe9'),
   },
 
   // ---------- Hats, Hair & Scarves ----------
@@ -423,7 +481,7 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['beach', 'resort', 'summer'],
     unlock: { type: 'free' },
     asset: 'acc_sun_hat',
-    variants: colorVariant('signature', '#dfd0ad', '#1e1b20'),
+    variants: colorVariants('signature', '#dfd0ad', '#1e1b20'),
   },
   {
     id: 'acc_french_beret',
@@ -433,7 +491,25 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['edgy', 'winter', 'holiday'],
     unlock: { type: 'free' },
     asset: 'acc_french_beret',
-    variants: colorVariant('signature', '#9e192d'),
+    variants: [
+      colorVariant('crimson', '#9e192d', undefined, 'Crimson'),
+      colorVariant('noir', '#201c22', undefined, 'Noir'),
+      colorVariant('camel', '#b8946a', undefined, 'Camel'),
+    ],
+  },
+  {
+    id: 'acc_gele_headtie',
+    name: 'Sculpted Aso-Oke Gele',
+    category: 'accessory',
+    slot: 'hat',
+    tags: ['nigerian', 'traditional', 'formal', 'glam'],
+    unlock: { type: 'free' },
+    asset: 'acc_gele_headtie',
+    variants: [
+      colorVariant('wine', '#8b1e2d', '#e6c35c', 'Wine & Gold'),
+      colorVariant('emerald', '#155c44', '#e6c35c', 'Emerald & Gold'),
+      colorVariant('royal', '#1d4488', '#e6c35c', 'Royal Blue & Gold'),
+    ],
   },
   {
     id: 'acc_satin_headband',
@@ -443,7 +519,11 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['girly', 'romantic'],
     unlock: { type: 'free' },
     asset: 'acc_satin_headband',
-    variants: colorVariant('signature', '#2e4e44'),
+    variants: [
+      colorVariant('emerald', '#2e4e44', undefined, 'Forest'),
+      colorVariant('blush', '#dca4b2', undefined, 'Blush'),
+      colorVariant('noir', '#221d24', undefined, 'Noir'),
+    ],
   },
   {
     id: 'acc_silk_scarf',
@@ -453,7 +533,11 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['corporate', 'silk', 'resort'],
     unlock: { type: 'free' },
     asset: 'acc_silk_scarf',
-    variants: colorVariant('signature', '#b83344', '#f5e8d0'),
+    variants: [
+      colorVariant('crimson', '#b83344', '#f5e8d0', 'Crimson & Cream'),
+      colorVariant('navy', '#243a68', '#f5e8d0', 'Navy & Cream'),
+      colorVariant('emerald', '#1f5e4d', '#e8d090', 'Emerald & Gold'),
+    ],
   },
 
   // ---------- Belts ----------
@@ -465,7 +549,11 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['edgy', 'casual'],
     unlock: { type: 'free' },
     asset: 'acc_leather_belt',
-    variants: colorVariant('signature', '#221c18'),
+    variants: [
+      colorVariant('noir', '#221c18', undefined, 'Noir'),
+      colorVariant('cognac', '#7d492d', undefined, 'Cognac'),
+      colorVariant('ivory', '#e8dfd1', undefined, 'Cream'),
+    ],
   },
   {
     id: 'acc_chain_belt',
@@ -473,9 +561,12 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     category: 'accessory',
     slot: 'belt',
     tags: ['evening', 'glam', 'metallic'],
-    unlock: { type: 'coins', cost: 25 },
+    unlock: { type: 'free' },
     asset: 'acc_chain_belt',
-    variants: metalVariant('gold', 'gold'),
+    variants: [
+      { id: 'gold', name: 'Gold', colors: { primary: 'gold' }, family: 'warm' },
+      { id: 'silver', name: 'Silver', colors: { primary: 'silver' }, family: 'cool' },
+    ],
   },
 
   // ---------- Hosiery & Gloves ----------
@@ -487,7 +578,10 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     tags: ['edgy', 'evening'],
     unlock: { type: 'free' },
     asset: 'acc_sheer_tights',
-    variants: colorVariant('signature', '#1e1b22'),
+    variants: [
+      colorVariant('noir', '#1e1b22', undefined, 'Sheer Noir'),
+      colorVariant('espresso', '#473026', undefined, 'Sheer Espresso'),
+    ],
   },
   {
     id: 'acc_opera_gloves',
@@ -495,9 +589,13 @@ export const ACCESSORY_ITEMS: AccessoryItem[] = [
     category: 'accessory',
     slot: 'gloves',
     tags: ['formal', 'evening', 'glam'],
-    unlock: { type: 'coins', cost: 40 },
+    unlock: { type: 'free' },
     asset: 'acc_opera_gloves',
-    variants: colorVariant('signature', '#1e1920'),
+    variants: [
+      colorVariant('noir', '#1e1920', undefined, 'Satin Noir'),
+      colorVariant('ivory', '#ece3d8', undefined, 'Ivory Silk'),
+      colorVariant('crimson', '#8a1b2d', undefined, 'Crimson'),
+    ],
   },
 
   // ---------- Legacy items (generators without a new counterpart) ----------

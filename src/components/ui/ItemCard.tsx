@@ -1,4 +1,4 @@
-import { Chip } from './Chip';
+import { LockIcon } from './Icons';
 import type { ReactNode } from 'react';
 
 export interface ItemCardVariant {
@@ -24,9 +24,8 @@ interface ItemCardProps {
 }
 
 /**
- * Catalog card. The whole card is a single accessible button (whole surface is
- * the touch target — AGENT.md §9); variant dots and the unlock action stop
- * propagation from the card click.
+ * Editorial catalog card. The entire card acts as an accessible button;
+ * color swatches and unlock controls stop propagation cleanly.
  */
 export function ItemCard({
   name,
@@ -65,54 +64,64 @@ export function ItemCard({
           onClick();
         }
       }}
-      className={`relative flex flex-col rounded-2xl border bg-surface p-3 transition ${
-        selected ? 'border-accent ring-2 ring-accent/40' : 'border-line'
+      className={`group relative flex flex-col overflow-hidden rounded-2xl border bg-surface p-2.5 transition-all duration-150 ${
+        selected
+          ? 'border-accent ring-2 ring-accent/35 shadow-soft'
+          : 'border-line hover:border-accent/40'
       } ${interactive ? 'cursor-pointer hover:shadow-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent' : ''}`}
     >
-      {previewSrc ? <div aria-hidden="true">{previewSrc}</div> : null}
-      <div className="flex flex-1 flex-col items-start justify-center pt-1">
-        <span className="text-sm font-semibold text-ink">{name}</span>
-        {description && <span className="mt-0.5 text-xs text-ink-soft">{description}</span>}
+      {previewSrc ? (
+        <div className={locked ? 'opacity-65' : ''} aria-hidden="true">
+          {previewSrc}
+        </div>
+      ) : null}
+
+      <div className="flex flex-1 flex-col items-start justify-start pt-2">
+        <span className="line-clamp-1 text-sm font-semibold text-ink">{name}</span>
+        {description && <span className="mt-0.5 line-clamp-2 text-xs text-ink-soft">{description}</span>}
         {tags && tags.length > 0 && (
-          <span className="mt-1.5 flex flex-wrap gap-1">
-            {tags.slice(0, 3).map((t) => (
-              <Chip key={t}>{t}</Chip>
-            ))}
-          </span>
+          <p className="mt-1 line-clamp-1 text-[11px] capitalize text-ink-soft">
+            {tags.slice(0, 2).join(' · ')}
+          </p>
         )}
       </div>
+
       {variants && variants.length > 0 && !locked && (
         <div
-          className="relative z-10 mt-2 flex items-center gap-1.5"
+          className="relative z-10 mt-2.5 flex flex-wrap items-center gap-1.5"
           role="group"
           aria-label={`${name} colors`}
           onClick={(e) => e.stopPropagation()}
         >
-          {variants.map((v) => (
-            <button
-              key={v.id}
-              type="button"
-              title={v.name}
-              aria-label={`${name}: ${v.name}`}
-              aria-pressed={activeVariantId === v.id}
-              onClick={(e) => {
-                e.stopPropagation();
-                onVariantClick?.(v.id);
-              }}
-              className={`h-6 w-6 rounded-full border-2 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
-                activeVariantId === v.id ? 'border-accent ring-2 ring-accent/40' : 'border-line'
-              }`}
-              style={{ backgroundColor: v.color }}
-            />
-          ))}
+          {variants.map((v) => {
+            const isVarActive = activeVariantId === v.id;
+            return (
+              <button
+                key={v.id}
+                type="button"
+                title={v.name}
+                aria-label={`${name}: ${v.name}`}
+                aria-pressed={isVarActive}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onVariantClick?.(v.id);
+                }}
+                className={`h-6 w-6 rounded-full border transition-transform duration-150 hover:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+                  isVarActive ? 'border-accent ring-2 ring-accent/40 ring-offset-1' : 'border-black/15'
+                }`}
+                style={{ backgroundColor: v.color }}
+              />
+            );
+          })}
         </div>
       )}
+
       {locked && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 rounded-2xl bg-ink/60 text-white">
-          <span className="text-lg" aria-hidden="true">
-            🔒
+        <div className="relative z-20 mt-2.5 flex items-center justify-between gap-2 border-t border-line pt-2">
+          <span className="inline-flex items-center gap-1 text-xs font-semibold tabular-nums text-ink-soft">
+            <LockIcon className="h-3.5 w-3.5" />
+            {lockedCost}
           </span>
-          <span className="text-xs font-semibold">{lockedCost} coins</span>
           <button
             type="button"
             onClick={(e) => {
@@ -120,7 +129,7 @@ export function ItemCard({
               onUnlock?.();
             }}
             disabled={!affordable}
-            className="min-h-[36px] rounded-full bg-gold px-3 text-xs font-bold text-ink disabled:opacity-50"
+            className="min-h-[36px] shrink-0 whitespace-nowrap rounded-lg bg-gold px-3 text-xs font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-45"
             aria-label={`Unlock ${name} for ${lockedCost} coins${affordable ? '' : ' (not enough coins)'}`}
           >
             Unlock

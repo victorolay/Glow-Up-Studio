@@ -1,4 +1,5 @@
 import type { OutfitItem, PaletteFamily, Variant } from '@/game/types';
+import { EXTRA_OUTFIT_ITEMS } from './outfitsExtra';
 
 /**
  * Wardrobe catalog, migrated to the anatomically tailored generator library in
@@ -35,10 +36,16 @@ function colorFamily(hex: string): PaletteFamily {
   return 'warm';
 }
 
-function variant(id: string, color: string, color2?: string, tags?: Variant['tags']): Variant {
+export function variant(
+  id: string,
+  color: string,
+  color2?: string,
+  tags?: Variant['tags'],
+  name = 'Signature',
+): Variant {
   return {
     id,
-    name: 'Signature',
+    name,
     colors: color2 ? { primary: color, secondary: color2 } : { primary: color },
     family: colorFamily(color),
     tags,
@@ -57,7 +64,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['romantic', 'silk', 'girly'],
     unlock: { type: 'free' },
     asset: 'top_silk_camisole',
-    variants: [variant('signature', '#f2e8df')],
+    variants: [
+      variant('ivory', '#f2e8df', undefined, undefined, 'Champagne Ivory'),
+      variant('blush', '#e7b9c2', undefined, undefined, 'Petal Blush'),
+      variant('noir', '#241f27', undefined, undefined, 'Obsidian'),
+    ],
   },
   {
     id: 'top_sweetheart_corset',
@@ -66,9 +77,13 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     layer: 'tops',
     occludes: [],
     tags: ['edgy', 'evening', 'bold'],
-    unlock: { type: 'coins', cost: 35 },
+    unlock: { type: 'free' },
     asset: 'top_sweetheart_corset',
-    variants: [variant('signature', '#1e1b22')],
+    variants: [
+      variant('noir', '#1e1b22', undefined, undefined, 'Jet Noir'),
+      variant('crimson', '#8f1b2b', undefined, undefined, 'Crimson'),
+      variant('pearl', '#ede5dc', undefined, undefined, 'Alabaster'),
+    ],
   },
   {
     id: 'top_off_shoulder',
@@ -79,7 +94,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['romantic', 'girly', 'bright'],
     unlock: { type: 'free' },
     asset: 'top_off_shoulder',
-    variants: [variant('signature', '#b83344')],
+    variants: [
+      variant('crimson', '#b83344', undefined, undefined, 'Ruby'),
+      variant('ivory', '#f0e9e0', undefined, undefined, 'Cream'),
+      variant('cobalt', '#264f94', undefined, undefined, 'Cobalt'),
+    ],
   },
   {
     id: 'top_wrap_blouse',
@@ -90,7 +109,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['corporate', 'silk', 'minimal'],
     unlock: { type: 'free' },
     asset: 'top_wrap_blouse',
-    variants: [variant('signature', '#d9c5b2')],
+    variants: [
+      variant('champagne', '#d9c5b2', undefined, undefined, 'Champagne'),
+      variant('emerald', '#1f5e4d', undefined, undefined, 'Emerald'),
+      variant('noir', '#27232c', undefined, undefined, 'Espresso Noir'),
+    ],
   },
   {
     id: 'top_cropped_cardigan',
@@ -101,7 +124,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['cozy', 'knit', 'girly'],
     unlock: { type: 'free' },
     asset: 'top_cropped_cardigan',
-    variants: [variant('signature', '#c9939e')],
+    variants: [
+      variant('rose', '#c9939e', undefined, undefined, 'Dusty Rose'),
+      variant('oat', '#e8dfd4', undefined, undefined, 'Oatmeal'),
+      variant('sage', '#758b77', undefined, undefined, 'Sage'),
+    ],
   },
   {
     id: 'top_halter_crop',
@@ -112,7 +139,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['sporty', 'minimal'],
     unlock: { type: 'free' },
     asset: 'top_halter_crop',
-    variants: [variant('signature', '#223344')],
+    variants: [
+      variant('navy', '#223344', undefined, undefined, 'Midnight Navy'),
+      variant('chalk', '#f2eee7', undefined, undefined, 'Chalk White'),
+      variant('terracotta', '#b85a42', undefined, undefined, 'Terracotta'),
+    ],
   },
   {
     id: 'top_ribbed_bodysuit',
@@ -123,7 +154,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['casual', 'minimal'],
     unlock: { type: 'free' },
     asset: 'top_ribbed_bodysuit',
-    variants: [variant('signature', '#f3efe9')],
+    variants: [
+      variant('ivory', '#f3efe9', undefined, undefined, 'Warm Ivory'),
+      variant('cocoa', '#5a3d31', undefined, undefined, 'Cocoa'),
+      variant('charcoal', '#2a2830', undefined, undefined, 'Charcoal'),
+    ],
   },
   {
     id: 'top_poplin_shirt',
@@ -134,7 +169,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['corporate', 'minimal', 'neutral'],
     unlock: { type: 'free' },
     asset: 'top_poplin_shirt',
-    variants: [variant('signature', '#eef3f8')],
+    variants: [
+      variant('white', '#eef3f8', undefined, undefined, 'Crisp White'),
+      variant('sky', '#a9c7e4', undefined, undefined, 'Sky Blue'),
+      variant('blush', '#ebd0d8', undefined, undefined, 'Soft Rose'),
+    ],
   },
   {
     id: 'top_lace_bralette',
@@ -143,9 +182,13 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     layer: 'tops',
     occludes: [],
     tags: ['edgy', 'lace', 'bold'],
-    unlock: { type: 'coins', cost: 30 },
+    unlock: { type: 'free' },
     asset: 'top_lace_bralette',
-    variants: [variant('signature', '#241f29')],
+    variants: [
+      variant('noir', '#241f29', undefined, undefined, 'Noir'),
+      variant('bordeaux', '#6e1d30', undefined, undefined, 'Bordeaux'),
+      variant('ivory', '#eee6dc', undefined, undefined, 'Ivory Lace'),
+    ],
   },
 
   // ---------- Dresses ----------
@@ -158,7 +201,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['evening', 'silk', 'romantic'],
     unlock: { type: 'free' },
     asset: 'dress_satin_slip',
-    variants: [variant('signature', '#c88c7a')],
+    variants: [
+      variant('copper', '#c88c7a', undefined, undefined, 'Copper Silk'),
+      variant('noir', '#1f1b24', undefined, undefined, 'Midnight Silk'),
+      variant('champagne', '#e2c9a6', undefined, undefined, 'Champagne'),
+    ],
   },
   {
     id: 'dress_blazer_mini',
@@ -167,9 +214,13 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     layer: 'dress',
     occludes: ['tops', 'bottoms', 'swim'],
     tags: ['corporate', 'formal', 'minimal'],
-    unlock: { type: 'coins', cost: 55 },
+    unlock: { type: 'free' },
     asset: 'dress_blazer_mini',
-    variants: [variant('signature', '#28252d')],
+    variants: [
+      variant('noir', '#28252d', undefined, undefined, 'Charcoal'),
+      variant('ivory', '#ebe4da', undefined, undefined, 'Ivory'),
+      variant('claret', '#731f30', undefined, undefined, 'Claret'),
+    ],
   },
   {
     id: 'dress_aline_sundress',
@@ -180,7 +231,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['beach', 'casual', 'summer', 'light-fabric', 'romantic'],
     unlock: { type: 'free' },
     asset: 'dress_aline_sundress',
-    variants: [variant('signature', '#e88b72', '#8a2b20', ['floral', 'bright'])],
+    variants: [
+      variant('signature', '#e88b72', '#8a2b20', ['floral', 'bright'], 'Sunset Coral'),
+      variant('azure', '#6fa4d8', '#224c78', ['floral'], 'Riviera Blue'),
+      variant('butter', '#edd07c', '#9e6b22', ['floral'], 'Lemon'),
+    ],
   },
   {
     id: 'dress_wrap_cocktail',
@@ -191,7 +246,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['cocktail', 'evening', 'silk'],
     unlock: { type: 'free' },
     asset: 'dress_wrap_cocktail',
-    variants: [variant('signature', '#1a5e4d')],
+    variants: [
+      variant('emerald', '#1a5e4d', undefined, undefined, 'Emerald'),
+      variant('crimson', '#9c2034', undefined, undefined, 'Crimson'),
+      variant('sapphire', '#1d3c74', undefined, undefined, 'Sapphire'),
+    ],
   },
   {
     id: 'dress_bodycon_midi',
@@ -200,9 +259,13 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     layer: 'dress',
     occludes: ['tops', 'bottoms', 'swim'],
     tags: ['evening', 'glam', 'bold'],
-    unlock: { type: 'coins', cost: 45 },
+    unlock: { type: 'free' },
     asset: 'dress_bodycon_midi',
-    variants: [variant('signature', '#5a2135')],
+    variants: [
+      variant('mulberry', '#5a2135', undefined, undefined, 'Mulberry'),
+      variant('noir', '#201c24', undefined, undefined, 'Obsidian'),
+      variant('bronze', '#9d6442', undefined, undefined, 'Espresso Bronze'),
+    ],
   },
   {
     id: 'dress_mermaid_gown',
@@ -211,9 +274,13 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     layer: 'dress',
     occludes: ['tops', 'bottoms', 'swim'],
     tags: ['formal', 'evening', 'silk'],
-    unlock: { type: 'coins', cost: 70 },
+    unlock: { type: 'free' },
     asset: 'dress_mermaid_gown',
-    variants: [variant('signature', '#132440')],
+    variants: [
+      variant('signature', '#132440', undefined, undefined, 'Midnight'),
+      variant('emerald', '#134436', undefined, undefined, 'Deep Emerald'),
+      variant('burgundy', '#6b1728', undefined, undefined, 'Bordeaux'),
+    ],
   },
   {
     id: 'dress_tulle_ballgown',
@@ -222,9 +289,13 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     layer: 'dress',
     occludes: ['tops', 'bottoms', 'swim'],
     tags: ['formal', 'evening', 'glam', 'romantic', 'holiday'],
-    unlock: { type: 'coins', cost: 80 },
+    unlock: { type: 'free' },
     asset: 'dress_tulle_ballgown',
-    variants: [variant('signature', '#c92a42')],
+    variants: [
+      variant('scarlet', '#c92a42', undefined, undefined, 'Scarlet'),
+      variant('blush', '#e2b5c2', undefined, undefined, 'Ballet Blush'),
+      variant('noir', '#231f2a', undefined, undefined, 'Black Swan'),
+    ],
   },
   {
     id: 'dress_pleated_shirt',
@@ -235,7 +306,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['casual', 'corporate', 'neutral'],
     unlock: { type: 'free' },
     asset: 'dress_pleated_shirt',
-    variants: [variant('signature', '#5e7a68')],
+    variants: [
+      variant('sage', '#5e7a68', undefined, undefined, 'Sage'),
+      variant('camel', '#b58d63', undefined, undefined, 'Camel'),
+      variant('navy', '#263854', undefined, undefined, 'Classic Navy'),
+    ],
   },
   {
     id: 'dress_offshoulder_gown',
@@ -244,9 +319,193 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     layer: 'dress',
     occludes: ['tops', 'bottoms', 'swim'],
     tags: ['evening', 'velvet', 'glam', 'formal'],
-    unlock: { type: 'coins', cost: 70 },
+    unlock: { type: 'free' },
     asset: 'dress_offshoulder_gown',
-    variants: [variant('signature', '#8b1e2d')],
+    variants: [
+      variant('garnet', '#8b1e2d', undefined, undefined, 'Garnet'),
+      variant('noir', '#211b24', undefined, undefined, 'Black Velvet'),
+      variant('plum', '#4c1e4a', undefined, undefined, 'Royal Plum'),
+    ],
+  },
+  {
+    id: 'dress_wrap_linen_midi',
+    name: 'Linen Wrap Midi Dress',
+    category: 'dress',
+    layer: 'dress',
+    occludes: ['tops', 'bottoms', 'swim'],
+    tags: ['casual', 'summer', 'resort'],
+    unlock: { type: 'free' },
+    asset: 'dress_wrap_linen_midi',
+    variants: [
+      variant('terracotta', '#c2654c', undefined, undefined, 'Terracotta'),
+      variant('ivory', '#ebe1d2', undefined, undefined, 'Oat Linen'),
+      variant('sage', '#6f8772', undefined, undefined, 'Olive Sage'),
+    ],
+  },
+  {
+    id: 'dress_floral_maxi',
+    name: 'Botanical Chiffon Maxi',
+    category: 'dress',
+    layer: 'dress',
+    occludes: ['tops', 'bottoms', 'swim'],
+    tags: ['romantic', 'floral', 'boho', 'light-fabric'],
+    unlock: { type: 'free' },
+    asset: 'dress_floral_maxi',
+    variants: [
+      variant('blush', '#d9788e', '#f5dde3', undefined, 'Rose Petal'),
+      variant('midnight', '#29344c', '#e0a3b5', undefined, 'Midnight Bloom'),
+    ],
+  },
+  // Party Dresses
+  {
+    id: 'dress_sequin_party_mini',
+    name: 'Champagne Sequin Party Mini',
+    category: 'dress',
+    layer: 'dress',
+    occludes: ['tops', 'bottoms', 'swim'],
+    tags: ['party', 'sequin', 'glam', 'cocktail'],
+    unlock: { type: 'free' },
+    asset: 'dress_sequin_party_mini',
+    variants: [
+      variant('champagne', '#e0b878', '#fff8dc', undefined, 'Champagne Gold'),
+      variant('rose', '#e38ca6', '#fff2f7', undefined, 'Blush Pink'),
+      variant('noir', '#262436', '#e8c468', undefined, 'Starlight Noir'),
+    ],
+  },
+  {
+    id: 'dress_tiered_cocktail',
+    name: 'Tiered Ruffle Cocktail Mini',
+    category: 'dress',
+    layer: 'dress',
+    occludes: ['tops', 'bottoms', 'swim'],
+    tags: ['party', 'cocktail', 'girly', 'romantic'],
+    unlock: { type: 'free' },
+    asset: 'dress_tiered_cocktail',
+    variants: [
+      variant('crimson', '#b82942', undefined, undefined, 'Ruby Berry'),
+      variant('lilac', '#a887c9', undefined, undefined, 'Soft Lilac'),
+      variant('ivory', '#f2ebe4', undefined, undefined, 'Pearl Cream'),
+    ],
+  },
+  {
+    id: 'dress_feather_satin_party',
+    name: 'Satin Bow Party Mini',
+    category: 'dress',
+    layer: 'dress',
+    occludes: ['tops', 'bottoms', 'swim'],
+    tags: ['party', 'cocktail', 'silk', 'glam'],
+    unlock: { type: 'free' },
+    asset: 'dress_feather_satin_party',
+    variants: [
+      variant('rose', '#d48682', undefined, undefined, 'Dusty Rose'),
+      variant('cobalt', '#224a8c', undefined, undefined, 'Cobalt'),
+      variant('noir', '#242028', undefined, undefined, 'Espresso Noir'),
+    ],
+  },
+  // Night Club Dresses
+  {
+    id: 'dress_club_cutout_mini',
+    name: 'Asymmetric Cutout Club Mini',
+    category: 'dress',
+    layer: 'dress',
+    occludes: ['tops', 'bottoms', 'swim'],
+    tags: ['club', 'party', 'edgy', 'bold'],
+    unlock: { type: 'free' },
+    asset: 'dress_club_cutout_mini',
+    variants: [
+      variant('noir', '#1c1820', undefined, undefined, 'Jet Noir'),
+      variant('crimson', '#9e1a2e', undefined, undefined, 'Cherry Red'),
+      variant('electric', '#1d4ed8', undefined, undefined, 'Electric Blue'),
+    ],
+  },
+  {
+    id: 'dress_club_corset_velvet',
+    name: 'Velvet Corset Club Mini',
+    category: 'dress',
+    layer: 'dress',
+    occludes: ['tops', 'bottoms', 'swim'],
+    tags: ['club', 'velvet', 'evening', 'bold'],
+    unlock: { type: 'free' },
+    asset: 'dress_club_corset_velvet',
+    variants: [
+      variant('noir', '#1f1b24', undefined, undefined, 'Midnight Velvet'),
+      variant('plum', '#4f193c', undefined, undefined, 'Plum Crush'),
+      variant('emerald', '#154c3b', undefined, undefined, 'Emerald Velvet'),
+    ],
+  },
+  {
+    id: 'dress_club_metallic_drape',
+    name: 'Liquid Metal Draped Mini',
+    category: 'dress',
+    layer: 'dress',
+    occludes: ['tops', 'bottoms', 'swim'],
+    tags: ['club', 'metallic', 'glam', 'party'],
+    unlock: { type: 'free' },
+    asset: 'dress_club_metallic_drape',
+    variants: [
+      variant('silver', '#c8d2dc', undefined, undefined, 'Liquid Chrome'),
+      variant('gold', '#d6ae58', undefined, undefined, 'Molten Gold'),
+      variant('bronze', '#a86942', undefined, undefined, 'Rose Bronze'),
+    ],
+  },
+  // Nigerian Wears
+  {
+    id: 'dress_ankara_peplum',
+    name: 'Ankara Peplum Midi Dress',
+    category: 'dress',
+    layer: 'dress',
+    occludes: ['tops', 'bottoms', 'swim'],
+    tags: ['nigerian', 'ankara', 'traditional', 'bright', 'cocktail'],
+    unlock: { type: 'free' },
+    asset: 'dress_ankara_peplum',
+    variants: [
+      variant('sunset', '#d95829', '#1d3c78', undefined, 'Sunset Indigo'),
+      variant('emerald', '#186e46', '#e8b938', undefined, 'Emerald Gold'),
+    ],
+  },
+  {
+    id: 'dress_aso_ebi_lace',
+    name: 'Aso-Ebi Beaded Lace Gown',
+    category: 'dress',
+    layer: 'dress',
+    occludes: ['tops', 'bottoms', 'swim'],
+    tags: ['nigerian', 'traditional', 'formal', 'lace', 'glam'],
+    unlock: { type: 'free' },
+    asset: 'dress_aso_ebi_lace',
+    variants: [
+      variant('emerald', '#155c44', '#e6c15a', undefined, 'Emerald & Gold'),
+      variant('plum', '#5b246e', '#e6c15a', undefined, 'Royal Plum'),
+      variant('rose', '#c98a7c', '#f2d8a8', undefined, 'Champagne Rose'),
+    ],
+  },
+  {
+    id: 'dress_iro_buba',
+    name: 'Iro & Buba Brocade Ensemble',
+    category: 'dress',
+    layer: 'dress',
+    occludes: ['tops', 'bottoms', 'swim'],
+    tags: ['nigerian', 'traditional', 'silk', 'formal', 'bold'],
+    unlock: { type: 'free' },
+    asset: 'dress_iro_buba',
+    variants: [
+      variant('royal', '#1d4488', '#e6c35c', undefined, 'Royal Blue & Gold'),
+      variant('burgundy', '#7c1d32', '#e6c35c', undefined, 'Wine & Gold'),
+      variant('teal', '#1a6a70', '#d4dce3', undefined, 'Peacock & Silver'),
+    ],
+  },
+  {
+    id: 'dress_adire_kaftan',
+    name: 'Adire Indigo Boubou Kaftan',
+    category: 'dress',
+    layer: 'dress',
+    occludes: ['tops', 'bottoms', 'swim'],
+    tags: ['nigerian', 'traditional', 'boho', 'bold', 'resort'],
+    unlock: { type: 'free' },
+    asset: 'dress_adire_kaftan',
+    variants: [
+      variant('indigo', '#1b3568', '#e6c15a', undefined, 'Abeokuta Indigo'),
+      variant('terracotta', '#9c4128', '#f2dfc2', undefined, 'Ochre Earth'),
+    ],
   },
 
   // ---------- Bottoms ----------
@@ -259,7 +518,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['corporate', 'minimal'],
     unlock: { type: 'free' },
     asset: 'bot_highwaist_trousers',
-    variants: [variant('signature', '#36333b')],
+    variants: [
+      variant('charcoal', '#36333b', undefined, undefined, 'Charcoal'),
+      variant('camel', '#b5926b', undefined, undefined, 'Camel'),
+      variant('ivory', '#ebe4d8', undefined, undefined, 'Ivory'),
+    ],
   },
   {
     id: 'bot_wide_palazzo',
@@ -270,7 +533,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['resort', 'romantic', 'light-fabric'],
     unlock: { type: 'free' },
     asset: 'bot_wide_palazzo',
-    variants: [variant('signature', '#d8c7af')],
+    variants: [
+      variant('sand', '#d8c7af', undefined, undefined, 'Warm Sand'),
+      variant('terracotta', '#b55c44', undefined, undefined, 'Terracotta'),
+      variant('noir', '#26222a', undefined, undefined, 'Noir'),
+    ],
   },
   {
     id: 'bot_skinny_jeans',
@@ -281,7 +548,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['casual', 'denim'],
     unlock: { type: 'free' },
     asset: 'bot_skinny_jeans',
-    variants: [variant('signature', '#3b5785')],
+    variants: [
+      variant('indigo', '#3b5785', undefined, undefined, 'Medium Wash'),
+      variant('noir', '#23232b', undefined, undefined, 'Washed Black'),
+      variant('ice', '#7fa1cc', undefined, undefined, 'Vintage Light'),
+    ],
   },
   {
     id: 'bot_denim_shorts',
@@ -292,7 +563,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['casual', 'denim', 'summer'],
     unlock: { type: 'free' },
     asset: 'bot_denim_shorts',
-    variants: [variant('signature', '#5478a8')],
+    variants: [
+      variant('wash', '#5478a8', undefined, undefined, 'Classic Wash'),
+      variant('white', '#f0ece4', undefined, undefined, 'Optic White'),
+      variant('noir', '#282830', undefined, undefined, 'Charcoal Denim'),
+    ],
   },
   {
     id: 'bot_cargo_pants',
@@ -303,7 +578,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['sporty', 'casual'],
     unlock: { type: 'free' },
     asset: 'bot_cargo_pants',
-    variants: [variant('signature', '#58664e')],
+    variants: [
+      variant('olive', '#58664e', undefined, undefined, 'Olive'),
+      variant('sand', '#c4b196', undefined, undefined, 'Khaki Sand'),
+      variant('noir', '#252429', undefined, undefined, 'Matte Black'),
+    ],
   },
   {
     id: 'bot_pleated_mini',
@@ -314,7 +593,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['sporty', 'girly'],
     unlock: { type: 'free' },
     asset: 'bot_pleated_mini',
-    variants: [variant('signature', '#e0a6b6')],
+    variants: [
+      variant('blush', '#e0a6b6', undefined, undefined, 'Blush'),
+      variant('white', '#f4f1ea', undefined, undefined, 'Court White'),
+      variant('navy', '#243554', undefined, undefined, 'Preppy Navy'),
+    ],
   },
   {
     id: 'bot_satin_midi',
@@ -325,7 +608,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['evening', 'silk', 'romantic'],
     unlock: { type: 'free' },
     asset: 'bot_satin_midi',
-    variants: [variant('signature', '#c8a882')],
+    variants: [
+      variant('champagne', '#c8a882', undefined, undefined, 'Champagne'),
+      variant('noir', '#221d26', undefined, undefined, 'Obsidian'),
+      variant('emerald', '#1d5b49', undefined, undefined, 'Emerald'),
+    ],
   },
   {
     id: 'bot_pencil_skirt',
@@ -336,7 +623,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['corporate', 'minimal'],
     unlock: { type: 'free' },
     asset: 'bot_pencil_skirt',
-    variants: [variant('signature', '#2c2930')],
+    variants: [
+      variant('charcoal', '#2c2930', undefined, undefined, 'Charcoal'),
+      variant('crimson', '#8f2436', undefined, undefined, 'Crimson'),
+      variant('taupe', '#9e8b7a', undefined, undefined, 'Taupe'),
+    ],
   },
   {
     id: 'bot_leather_mini',
@@ -345,9 +636,13 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     layer: 'bottoms',
     occludes: [],
     tags: ['edgy', 'bold'],
-    unlock: { type: 'coins', cost: 40 },
+    unlock: { type: 'free' },
     asset: 'bot_leather_mini',
-    variants: [variant('signature', '#201c22')],
+    variants: [
+      variant('noir', '#201c22', undefined, undefined, 'Black Leather'),
+      variant('oxblood', '#5c1a24', undefined, undefined, 'Oxblood'),
+      variant('cognac', '#854c2c', undefined, undefined, 'Cognac'),
+    ],
   },
 
   // ---------- Outerwear ----------
@@ -358,9 +653,13 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     layer: 'outerwear',
     occludes: [],
     tags: ['edgy', 'bold'],
-    unlock: { type: 'coins', cost: 60 },
+    unlock: { type: 'free' },
     asset: 'out_moto_jacket',
-    variants: [variant('signature', '#1e1b20')],
+    variants: [
+      variant('noir', '#1e1b20', undefined, undefined, 'Noir'),
+      variant('oxblood', '#631d28', undefined, undefined, 'Oxblood'),
+      variant('cream', '#eae2d6', undefined, undefined, 'Bone'),
+    ],
   },
   {
     id: 'out_belted_trench',
@@ -371,7 +670,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['corporate', 'minimal', 'neutral'],
     unlock: { type: 'free' },
     asset: 'out_belted_trench',
-    variants: [variant('signature', '#c9b088')],
+    variants: [
+      variant('khaki', '#c9b088', undefined, undefined, 'Honey Khaki'),
+      variant('noir', '#28252d', undefined, undefined, 'Noir'),
+      variant('olive', '#5e6b54', undefined, undefined, 'Olive'),
+    ],
   },
   {
     id: 'out_structured_blazer',
@@ -382,7 +685,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['corporate', 'formal', 'minimal'],
     unlock: { type: 'free' },
     asset: 'out_structured_blazer',
-    variants: [variant('signature', '#36323c')],
+    variants: [
+      variant('charcoal', '#36323c', undefined, undefined, 'Charcoal'),
+      variant('ivory', '#ede7de', undefined, undefined, 'Ivory'),
+      variant('crimson', '#962234', undefined, undefined, 'Power Red'),
+    ],
   },
   {
     id: 'out_denim_jacket',
@@ -393,7 +700,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['casual', 'denim'],
     unlock: { type: 'free' },
     asset: 'out_denim_jacket',
-    variants: [variant('signature', '#4b6c9e')],
+    variants: [
+      variant('indigo', '#4b6c9e', undefined, undefined, 'Classic Blue'),
+      variant('noir', '#272730', undefined, undefined, 'Washed Black'),
+      variant('ecru', '#e8dfd2', undefined, undefined, 'Ecru'),
+    ],
   },
   {
     id: 'out_puffer_jacket',
@@ -404,7 +715,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['sporty', 'cozy', 'heavy-fabric'],
     unlock: { type: 'free' },
     asset: 'out_puffer_jacket',
-    variants: [variant('signature', '#eae7e1')],
+    variants: [
+      variant('pearl', '#eae7e1', undefined, undefined, 'Pearl White'),
+      variant('noir', '#242128', undefined, undefined, 'Matte Black'),
+      variant('cocoa', '#724d3b', undefined, undefined, 'Espresso'),
+    ],
   },
   {
     id: 'out_cashmere_coat',
@@ -413,9 +728,13 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     layer: 'outerwear',
     occludes: [],
     tags: ['corporate', 'heavy-fabric', 'romantic'],
-    unlock: { type: 'coins', cost: 55 },
+    unlock: { type: 'free' },
     asset: 'out_cashmere_coat',
-    variants: [variant('signature', '#9d7656')],
+    variants: [
+      variant('camel', '#9d7656', undefined, undefined, 'Warm Camel'),
+      variant('noir', '#221f26', undefined, undefined, 'Noir'),
+      variant('slate', '#5f6b7a', undefined, undefined, 'Slate Grey'),
+    ],
   },
 
   // ---------- Swimwear ----------
@@ -437,7 +756,7 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     layer: 'swim',
     occludes: ['tops', 'bottoms'],
     tags: ['beach', 'glam'],
-    unlock: { type: 'coins', cost: 40 },
+    unlock: { type: 'free' },
     asset: 'swim_cutout_monokini',
     variants: [variant('signature', '#1e2c44')],
   },
@@ -474,7 +793,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['formal', 'evening', 'glam'],
     unlock: { type: 'free' },
     asset: 'shoe_stiletto_pumps',
-    variants: [variant('signature', '#9e192d')],
+    variants: [
+      variant('crimson', '#9e192d', undefined, undefined, 'Crimson Patent'),
+      variant('noir', '#1d1921', undefined, undefined, 'Jet Noir'),
+      variant('nude', '#d8b49c', undefined, undefined, 'Nude'),
+    ],
   },
   {
     id: 'shoe_strappy_heels',
@@ -485,7 +808,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['evening', 'glam', 'metallic'],
     unlock: { type: 'free' },
     asset: 'shoe_strappy_heels',
-    variants: [variant('signature', 'gold')],
+    variants: [
+      variant('gold', '#d4af37', undefined, undefined, 'Gold'),
+      variant('silver', '#c8d2dc', undefined, undefined, 'Silver'),
+      variant('noir', '#1f1b24', undefined, undefined, 'Black'),
+    ],
   },
   {
     id: 'shoe_platform_sandals',
@@ -496,7 +823,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['summer', 'casual', 'beach'],
     unlock: { type: 'free' },
     asset: 'shoe_platform_sandals',
-    variants: [variant('signature', '#f4ede4')],
+    variants: [
+      variant('ivory', '#f4ede4', undefined, undefined, 'Ivory'),
+      variant('tan', '#b8885e', undefined, undefined, 'Tan'),
+      variant('noir', '#221e25', undefined, undefined, 'Black'),
+    ],
   },
   {
     id: 'shoe_slingback_mules',
@@ -507,7 +838,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['corporate', 'minimal'],
     unlock: { type: 'free' },
     asset: 'shoe_slingback_mules',
-    variants: [variant('signature', '#221e26')],
+    variants: [
+      variant('noir', '#221e26', undefined, undefined, 'Noir'),
+      variant('burgundy', '#6e1d2c', undefined, undefined, 'Burgundy'),
+      variant('ivory', '#efe7dc', undefined, undefined, 'Ivory'),
+    ],
   },
   {
     id: 'shoe_ballet_flats',
@@ -518,7 +853,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['girly', 'romantic', 'casual'],
     unlock: { type: 'free' },
     asset: 'shoe_ballet_flats',
-    variants: [variant('signature', '#e2b9b2')],
+    variants: [
+      variant('signature', '#e2b9b2', undefined, undefined, 'Ballet Pink'),
+      variant('noir', '#221e26', undefined, undefined, 'Satin Noir'),
+      variant('red', '#9c2032', undefined, undefined, 'Cherry'),
+    ],
   },
   {
     id: 'shoe_classic_loafers',
@@ -529,7 +868,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['corporate', 'minimal'],
     unlock: { type: 'free' },
     asset: 'shoe_classic_loafers',
-    variants: [variant('signature', '#5a3622')],
+    variants: [
+      variant('cognac', '#5a3622', undefined, undefined, 'Cognac'),
+      variant('noir', '#1e1b20', undefined, undefined, 'Noir'),
+      variant('oxblood', '#5c1c28', undefined, undefined, 'Oxblood'),
+    ],
   },
   {
     id: 'shoe_court_sneakers',
@@ -540,7 +883,11 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     tags: ['sporty', 'casual'],
     unlock: { type: 'free' },
     asset: 'shoe_court_sneakers',
-    variants: [variant('signature', '#f5f2ec', '#2f4e3d')],
+    variants: [
+      variant('forest', '#f5f2ec', '#2f4e3d', undefined, 'White & Forest'),
+      variant('noir', '#f5f2ec', '#242028', undefined, 'White & Noir'),
+      variant('rose', '#f5f2ec', '#c9788e', undefined, 'White & Rose'),
+    ],
   },
   {
     id: 'shoe_chelsea_boots',
@@ -549,9 +896,13 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     layer: 'shoes',
     occludes: [],
     tags: ['edgy', 'casual', 'heavy-fabric'],
-    unlock: { type: 'coins', cost: 45 },
+    unlock: { type: 'free' },
     asset: 'shoe_chelsea_boots',
-    variants: [variant('signature', '#272228')],
+    variants: [
+      variant('noir', '#272228', undefined, undefined, 'Noir'),
+      variant('espresso', '#4a3022', undefined, undefined, 'Espresso'),
+      variant('cream', '#e6dfd3', undefined, undefined, 'Chalk'),
+    ],
   },
   {
     id: 'shoe_overknee_boots',
@@ -560,9 +911,13 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     layer: 'shoes',
     occludes: [],
     tags: ['edgy', 'glam', 'heavy-fabric'],
-    unlock: { type: 'coins', cost: 50 },
+    unlock: { type: 'free' },
     asset: 'shoe_overknee_boots',
-    variants: [variant('signature', '#201c24')],
+    variants: [
+      variant('noir', '#201c24', undefined, undefined, 'Noir'),
+      variant('taupe', '#7d6658', undefined, undefined, 'Suede Taupe'),
+      variant('oxblood', '#591b26', undefined, undefined, 'Oxblood'),
+    ],
   },
   {
     id: 'shoe_barefoot',
@@ -575,6 +930,7 @@ export const OUTFIT_ITEMS: OutfitItem[] = [
     asset: 'shoe_barefoot',
     variants: [],
   },
+  ...EXTRA_OUTFIT_ITEMS,
 ];
 
 /** Convenience: variant lookup with fallback to first variant. */

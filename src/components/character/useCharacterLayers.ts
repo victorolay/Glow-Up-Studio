@@ -70,8 +70,24 @@ const LINER_STYLE_BY_ITEM: Record<string, 'thin' | 'winged' | 'bold'> = {
 
 const FALLBACK_TONE = { id: 'honey', name: 'Honey', base: '#e3b491', shadow: '#bd8e6c' };
 
+export interface CharacterLayerOptions {
+  bareMode?: boolean;
+  isBackView?: boolean;
+}
+
+/** Resolve active hair color hex for back-of-head sculptural shading. */
+export function useCharacterHairColor(): string {
+  const hair = useCharacterStore((s) => s.hair);
+  return (
+    hair.colorCustom ??
+    getHairColor(hair.variantId ?? 'chestnut')?.base ??
+    '#6b4230'
+  );
+}
+
 /** Build the ordered render layer stack from the current character state. */
-export function useCharacterLayers(): RenderLayer[] {
+export function useCharacterLayers(opts: CharacterLayerOptions = {}): RenderLayer[] {
+  const { bareMode = false, isBackView = false } = opts;
   const char = useCharacterStore();
   return useMemo(() => {
     const layers: ComposableLayer[] = [];
@@ -96,7 +112,7 @@ export function useCharacterLayers(): RenderLayer[] {
 
     // Skin state: concerns fade as steps complete, glow builds (§5.2)
     const sk = char.skincare.completed;
-    const stepCount = Object.values(sk).filter(Boolean).length;
+    const stepCount = bareMode ? 0 : Object.values(sk).filter(Boolean).length;
     const glow = Math.round((stepCount / 7) * 5);
     layers.push({
       key: 'skin',
@@ -104,55 +120,65 @@ export function useCharacterLayers(): RenderLayer[] {
       src: getAsset('placeholder_skin', {
         ...base,
         glow,
-        concerns: {
-          blemishes: !sk.blemish,
-          dryness: !sk.moisturizer,
-          darkCircles: !sk.moisturizer,
-          oiliness: !(sk.cleanse && sk.mask),
-        },
+        concerns: bareMode
+          ? { blemishes: true, dryness: true, darkCircles: true, oiliness: true }
+          : {
+              blemishes: !sk.blemish,
+              dryness: !sk.moisturizer,
+              darkCircles: !sk.moisturizer,
+              oiliness: !(sk.cleanse && sk.mask),
+            },
       }),
       alt: 'Skin state',
     });
 
-    // Makeup
-    for (const slot of Object.keys(char.makeup) as MakeupSlot[]) {
-      const sel = char.makeup[slot];
-      if (!sel) continue;
-      const item = getMakeupItem(sel.itemId);
-      if (!item) continue;
-      const variant = item.variants?.find((v) => v.id === sel.variantId) ?? item.variants?.[0];
-      const mp: AssetParams = {
-        ...base,
-        color: item.autoMatchSkinTone ? tone.base : variant?.colors.primary,
-        color2: variant?.colors.secondary,
-        intensity: sel.intensity,
-        finish: sel.finish,
-        linerStyle: slot === 'eyeliner' ? LINER_STYLE_BY_ITEM[item.id] : undefined,
-      };
+    // Makeup (hidden in bareMode or when viewing back of head)
+    if (!bareMode && !isBackView) {
+      for (const slot of Object.keys(char.makeup) as MakeupSlot[]) {
+        const sel = char.makeup[slot];
+        if (!sel) continue;
+        const item = getMakeupItem(sel.itemId);
+        if (!item) continue;
+        const variant = item.variants?.find((v) => v.id === sel.variantId) ?? item.variants?.[0];
+        const mp: AssetParams = {
+          ...base,
+          color: item.autoMatchSkinTone ? tone.base : variant?.colors.primary,
+          color2: variant?.colors.secondary,
+          intensity: sel.intensity,
+          finish: sel.finish,
+          linerStyle: slot === 'eyeliner' ? LINER_STYLE_BY_ITEM[item.id] : undefined,
+        };
+        layers.push({
+          key: `mk-${slot}`,
+          layer: 'makeup',
+          zOffset: MAKEUP_Z[slot],
+          src: getAsset(item.asset, mp),
+          blend: item.blend,
+          opacity: item.baseOpacity !== undefined ? item.baseOpacity * sel.intensity : undefined,
+          alt: item.name,
+        });
+      }
+    }
+
+    // Face features (hidden when rotating to back view)
+    const iris = EYE_COLORS.find((e) => e.id === (char.eyeColorId || DEFAULT_EYE_COLOR_ID))?.hex;
+    if (!isBackView) {
       layers.push({
-        key: `mk-${slot}`,
-        layer: 'makeup',
-        zOffset: MAKEUP_Z[slot],
-        src: getAsset(item.asset, mp),
-        blend: item.blend,
-        opacity: item.baseOpacity !== undefined ? item.baseOpacity * sel.intensity : undefined,
-        alt: item.name,
+        key: 'face',
+        layer: 'face',
+        src: getAsset('placeholder_face', {
+          ...base,
+          freckles: char.freckles,
+          beautyMark: char.beautyMark,
+          iris,
+        }),
+        alt: 'Face',
       });
     }
 
-    // Face features
-    const iris = EYE_COLORS.find((e) => e.id === (char.eyeColorId || DEFAULT_EYE_COLOR_ID))?.hex;
-    layers.push({
-      key: 'face',
-      layer: 'face',
-      src: getAsset('placeholder_face', {
-        ...base,
-        freckles: char.freckles,
-        beautyMark: char.beautyMark,
-        iris,
-      }),
-      alt: 'Face',
-    });
+    if (bareMode) {
+      return orderComposableLayers(layers);
+    }
 
     // Hair (back + front)
     if (char.hair.styleId) {
@@ -171,12 +197,14 @@ export function useCharacterLayers(): RenderLayer[] {
           src: getAsset(hair.asset, { ...hp, hairBack: true }),
           alt: `${hair.name} (back)`,
         });
-        layers.push({
-          key: 'hair-front',
-          layer: 'hairFront',
-          src: getAsset(hair.asset, { ...hp, hairBack: false }),
-          alt: `${hair.name} (front)`,
-        });
+        if (!isBackView) {
+          layers.push({
+            key: 'hair-front',
+            layer: 'hairFront',
+            src: getAsset(hair.asset, { ...hp, hairBack: false }),
+            alt: `${hair.name} (front)`,
+          });
+        }
       }
     }
 
@@ -209,8 +237,9 @@ export function useCharacterLayers(): RenderLayer[] {
       });
     }
 
-    // Accessories
+    // Accessories (skip facial eyewear when viewing back of head)
     for (const slot of Object.keys(char.accessories) as AccessorySlot[]) {
+      if (isBackView && slot === 'glasses') continue;
       const sel = char.accessories[slot];
       if (!sel) continue;
       const item = getAccessoryItem(sel.itemId);
@@ -232,7 +261,7 @@ export function useCharacterLayers(): RenderLayer[] {
     }
 
     return orderComposableLayers(layers);
-  }, [char]);
+  }, [char, bareMode, isBackView]);
 }
 
 /** Face region in canvas percentages, for stage overlays (blemish taps etc.). */

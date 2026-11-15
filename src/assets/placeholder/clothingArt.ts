@@ -9,6 +9,7 @@ import {
   ramp,
   type FabricRamp,
 } from './shared';
+import { EXTRA_CLOTHING_CATALOG, EXTRA_CLOTHING_GENERATORS } from './clothingArtExtra';
 
 /*
  * Anatomically tailored wardrobe generators authored exclusively for the
@@ -37,7 +38,7 @@ import {
  * Generates an exact torso garment outline from a neckline path down to a chosen hem Y.
  * `hemY` can be 430 (cropped), 485 (natural waist), 535 (high hip), 585 (mid hip), or 625 (full hip).
  */
-function torsoContour(opts: {
+export function torsoContour(opts: {
   neckPath: string;
   leftShoulderX?: number;
   shoulderY?: number;
@@ -84,7 +85,7 @@ function torsoContour(opts: {
 }
 
 /** Exact bust sculpting & cleavage contouring matching figure.ts (apexes 255,382 & 345,382). */
-function bustContour(r: FabricRamp, opacity = 0.92): string {
+export function bustContour(r: FabricRamp, opacity = 0.92): string {
   return `
     <g opacity="${opacity}">
       <ellipse cx="255" cy="382" rx="39" ry="41" fill="url(#fBustL)" />
@@ -97,7 +98,7 @@ function bustContour(r: FabricRamp, opacity = 0.92): string {
 }
 
 /** Pose-aware left & right sleeves matching figure.ts arm paths. */
-function poseSleeves(pose: PoseId | undefined, length: 'cap' | 'short' | 'threeQuarter' | 'long', ease = 2.5): { left: string; right: string } {
+export function poseSleeves(pose: PoseId | undefined, length: 'cap' | 'short' | 'threeQuarter' | 'long', ease = 2.5): { left: string; right: string } {
   const e = ease;
   const rCap = `M 376 268 C 396 272, 416 290, 424 322 C 414 330, 400 334, 378 334 L 376 282 Z`;
   const rShort = `M 376 268 C 402 274, 422 304, 431 352 C 418 358, 404 358, 392 352 L 378 334 L 376 282 Z`;
@@ -114,7 +115,7 @@ function poseSleeves(pose: PoseId | undefined, length: 'cap' | 'short' | 'threeQ
     return { left: length === 'cap' ? lCap : length === 'short' ? lShort : length === 'threeQuarter' ? l34 : lLong, right };
   }
 
-  if (pose === 'handOnHip') {
+  if (pose === 'handOnHip' || pose === 'vogue') {
     const lCap = `M 226 268 C 202 276, 184 302, 174 328 C 184 336, 198 336, 218 334 L 224 282 Z`;
     const lShort = `M 226 268 C 200 276, 178 308, 166 352 C 178 358, 194 356, 202 346 L 222 334 L 224 282 Z`;
     const l34 = `M 226 268 C 198 276, 176 308, 162 354 C 154 388, 152 418, 164 446 C 178 446, 190 438, 194 426 C 186 406, 188 384, 202 348 L 224 332 L 224 282 Z`;
@@ -132,7 +133,7 @@ function poseSleeves(pose: PoseId | undefined, length: 'cap' | 'short' | 'threeQ
 /** Exact two-leg trouser contour generator matching figure.ts leg separation at (300, 669) and calf curvature. */
 
 /** Exact skirt contour generator matching waist (y480) -> hips (y623, x186..414) -> flare. */
-function skirtContour(opts: {
+export function skirtContour(opts: {
   topY: number;
   hemY: number;
   silhouette: 'pencil' | 'aline' | 'flare';
@@ -173,7 +174,7 @@ function skirtContour(opts: {
 
 /* ---------- Procedural Patterns ---------- */
 
-function lacePattern(id: string, color: string): string {
+export function lacePattern(id: string, color: string): string {
   const c = shade(color, 0.2);
   return (
     `<pattern id="${id}" width="18" height="18" patternUnits="userSpaceOnUse">` +
@@ -690,6 +691,375 @@ function offShoulderGown(p: AssetParams): string {
     <path d="M 264 494 C 234 690, 198 940, 174 1198 M 336 494 C 366 690, 402 940, 426 1198" stroke="${r.deep}" stroke-width="5" opacity="0.34" filter="url(#cBlur4)" fill="none" />
   `);
 }
+
+function wrapLinenMidiDress(p: AssetParams): string {
+  const r = ramp(p.color ?? '#c2654c');
+  const sh = castShadowColor(p);
+  const sl = poseSleeves(p.pose, 'short', 2.8);
+  const bodice = torsoContour({
+    neckPath: `L 340 256 L 300 368 L 260 256`,
+    hemY: 496,
+    ease: 2.0,
+  });
+  const skirt = skirtContour({ topY: 486, hemY: 920, silhouette: 'aline' });
+  return toUri(`
+    ${defsBlock(r)}
+    <path d="${sl.left}" fill="url(#fVert)" />
+    <path d="${sl.right}" fill="url(#fVert)" />
+    <path d="${skirt}" fill="${sh}" opacity="0.28" filter="url(#cBlur4)" transform="translate(0, 5)" />
+    <path d="${skirt}" fill="url(#fVert)" />
+    <path d="${bodice}" fill="url(#fBody)" />
+    ${bustContour(r, 0.9)}
+    <path d="M 260 256 L 332 492" stroke="${r.deep}" stroke-width="1.9" opacity="0.48" fill="none" />
+    <path d="M 244 490 C 282 590, 326 730, 354 926" stroke="${r.deep}" stroke-width="2.4" opacity="0.45" fill="none" />
+    <path d="M 240 478 C 276 490, 324 490, 360 478 L 362 498 C 324 510, 276 510, 238 498 Z" fill="${r.dark}" />
+    <path d="M 254 496 C 248 532, 240 562, 234 584 M 262 496 C 266 528, 268 556, 266 576" stroke="${r.mid2}" stroke-width="6" stroke-linecap="round" fill="none" />
+  `);
+}
+
+function botanicalChiffonMaxi(p: AssetParams): string {
+  const r = ramp(p.color ?? '#d9788e');
+  const bloom = p.color2 ?? '#f5dde3';
+  const sh = castShadowColor(p);
+  const sl = poseSleeves(p.pose, 'cap', 3.2);
+  const bodice = torsoContour({
+    neckPath: `L 348 286 C 328 318, 308 334, 300 342 C 292 334, 272 318, 252 286`,
+    leftShoulderX: 214,
+    shoulderY: 288,
+    hemY: 468,
+    ease: 2.0,
+  });
+  const skirt = skirtContour({ topY: 458, hemY: 1135, silhouette: 'flare' });
+  const floralPat = `
+    <pattern id="botanPat" width="34" height="34" patternUnits="userSpaceOnUse">
+      <circle cx="10" cy="10" r="3.4" fill="${bloom}" opacity="0.72" />
+      <circle cx="14" cy="13" r="2.6" fill="${bloom}" opacity="0.62" />
+      <circle cx="7" cy="13" r="2.6" fill="${bloom}" opacity="0.62" />
+      <circle cx="10" cy="11" r="1.4" fill="#f2d27a" opacity="0.88" />
+      <circle cx="26" cy="24" r="3.0" fill="${bloom}" opacity="0.68" />
+      <circle cx="29" cy="27" r="2.2" fill="${r.specular}" opacity="0.58" />
+      <path d="M 12 15 Q 17 19 20 15" stroke="#4f7c58" stroke-width="1.3" fill="none" opacity="0.55" />
+    </pattern>`;
+  return toUri(`
+    ${defsBlock(r, floralPat)}
+    <path d="${sl.left}" fill="url(#fSheer)" />
+    <path d="${sl.right}" fill="url(#fSheer)" />
+    <path d="${skirt}" fill="${sh}" opacity="0.28" filter="url(#cBlur4)" transform="translate(0, 6)" />
+    <path d="${skirt}" fill="url(#fVert)" />
+    <path d="${bodice}" fill="url(#fBody)" />
+    <path d="${skirt}" fill="url(#botanPat)" />
+    <path d="${bodice}" fill="url(#botanPat)" />
+    ${bustContour(r, 0.92)}
+    <path d="M 240 448 C 276 460, 324 460, 360 448 L 361 464 C 324 476, 276 476, 239 464 Z" fill="${r.dark}" opacity="0.85" />
+    <path d="M 262 466 C 242 680, 210 920, 184 1142 M 300 468 C 300 690, 300 930, 300 1152 M 338 466 C 358 680, 390 920, 416 1142" stroke="${r.deep}" stroke-width="3.5" opacity="0.24" filter="url(#cBlur2)" fill="none" />
+  `);
+}
+
+function sequinPartyMini(p: AssetParams): string {
+  const r = ramp(p.color ?? '#e0b878');
+  const glint = p.color2 ?? '#fff8dc';
+  const sh = castShadowColor(p);
+  const bodice =
+    `M 274 236 L 326 236 L 352 330 C 374 358, 386 382, 384 404 ` +
+    `C 374 432, 360 458, 358 492 C 324 504, 276 504, 242 492 ` +
+    `C 240 458, 226 432, 216 404 C 214 382, 226 358, 248 330 Z`;
+  const skirt = skirtContour({ topY: 484, hemY: 752, silhouette: 'flare' });
+  const seqPat = `
+    <pattern id="seqParty" width="14" height="14" patternUnits="userSpaceOnUse">
+      <circle cx="4" cy="4" r="2.2" fill="${glint}" opacity="0.45" />
+      <circle cx="11" cy="10" r="2.2" fill="${r.specular}" opacity="0.52" />
+      <circle cx="4" cy="11" r="1.4" fill="#ffffff" opacity="0.62" />
+      <circle cx="10" cy="4" r="1.5" fill="${r.light}" opacity="0.48" />
+    </pattern>`;
+  return toUri(`
+    ${defsBlock(r, seqPat)}
+    <path d="${skirt}" fill="${sh}" opacity="0.32" filter="url(#cBlur4)" transform="translate(0, 5)" />
+    <path d="${skirt}" fill="url(#fVert)" />
+    <path d="${bodice}" fill="url(#fBody)" />
+    <path d="${skirt}" fill="url(#seqParty)" />
+    <path d="${bodice}" fill="url(#seqParty)" />
+    <path d="M 273 226 C 288 234, 312 234, 327 226 L 328 242 C 312 250, 288 250, 272 242 Z" fill="${r.dark}" />
+    ${bustContour(r, 0.96)}
+    <path d="M 242 484 C 276 496, 324 496, 358 484" stroke="${glint}" stroke-width="2.4" opacity="0.7" fill="none" />
+    <g fill="#ffffff" opacity="0.88">
+      <path d="M 262 374 L 264 380 L 270 382 L 264 384 L 262 390 L 260 384 L 254 382 L 260 380 Z" />
+      <path d="M 334 576 L 336 582 L 342 584 L 336 586 L 334 592 L 332 586 L 326 584 L 332 582 Z" />
+      <path d="M 232 672 L 234 677 L 239 679 L 234 681 L 232 686 L 230 681 L 225 679 L 230 677 Z" />
+    </g>
+  `);
+}
+
+function tieredCocktailMini(p: AssetParams): string {
+  const r = ramp(p.color ?? '#b82942');
+  const sh = castShadowColor(p);
+  const bodice = torsoContour({
+    neckPath: `L 366 328 C 344 314, 318 326, 300 350 C 282 326, 256 314, 234 328`,
+    leftShoulderX: 222,
+    shoulderY: 330,
+    hemY: 492,
+    ease: 1.0,
+  });
+  const tier1 = skirtContour({ topY: 484, hemY: 598, silhouette: 'flare' });
+  const tier2 = skirtContour({ topY: 562, hemY: 686, silhouette: 'flare' });
+  const tier3 = skirtContour({ topY: 652, hemY: 774, silhouette: 'flare' });
+  return toUri(`
+    ${defsBlock(r)}
+    <path d="${tier3}" fill="${sh}" opacity="0.30" filter="url(#cBlur4)" transform="translate(0, 6)" />
+    <path d="${tier3}" fill="url(#fVert)" />
+    <path d="${tier2}" fill="${sh}" opacity="0.24" filter="url(#cBlur2)" transform="translate(0, 4)" />
+    <path d="${tier2}" fill="url(#fBody)" />
+    <path d="${tier1}" fill="${sh}" opacity="0.24" filter="url(#cBlur2)" transform="translate(0, 4)" />
+    <path d="${tier1}" fill="url(#fVert)" />
+    <path d="${bodice}" fill="url(#fBody)" />
+    ${bustContour(r, 0.98)}
+    <path d="M 240 482 C 276 494, 324 494, 360 482 L 361 496 C 324 508, 276 508, 239 496 Z" fill="${r.dark}" />
+    <path d="M 178 594 C 242 622, 358 622, 422 594 M 158 682 C 232 710, 368 710, 442 682 M 136 770 C 220 798, 380 798, 464 770" stroke="${r.specular}" stroke-width="2" opacity="0.58" fill="none" />
+  `);
+}
+
+function satinBowPartyDress(p: AssetParams): string {
+  const r = ramp(p.color ?? '#d48682');
+  const sh = castShadowColor(p);
+  const bodice =
+    `M 224 274 C 242 268, 256 276, 268 302 C 296 330, 336 336, 378 332 ` +
+    `C 386 358, 389 382, 385 402 C 378 428, 362 456, 358 490 ` +
+    `C 324 502, 276 502, 242 490 C 238 456, 222 428, 215 402 ` +
+    `C 210 374, 214 334, 224 274 Z`;
+  const skirt = skirtContour({ topY: 482, hemY: 745, silhouette: 'pencil' });
+  return toUri(`
+    ${defsBlock(r)}
+    <path d="${skirt}" fill="${sh}" opacity="0.30" filter="url(#cBlur4)" transform="translate(0, 5)" />
+    <path d="${skirt}" fill="url(#fVert)" />
+    <path d="${bodice}" fill="url(#fBody)" />
+    ${bustContour(r, 0.96)}
+    <path d="M 220 530 C 204 600, 200 668, 206 736 C 230 676, 236 606, 242 530 Z" fill="url(#fSheen)" opacity="0.72" filter="url(#cBlur8)" />
+    <path d="M 244 488 C 282 560, 316 648, 338 746" stroke="${r.deep}" stroke-width="2.6" opacity="0.44" fill="none" />
+    <!-- Sculptural shoulder bow -->
+    <path d="M 232 276 C 206 244, 186 254, 198 282 C 206 294, 222 288, 232 276 Z" fill="url(#fVert)" stroke="${r.deep}" stroke-width="1" />
+    <path d="M 232 276 C 254 246, 276 256, 264 282 C 254 294, 242 288, 232 276 Z" fill="url(#fBody)" stroke="${r.deep}" stroke-width="1" />
+    <circle cx="232" cy="276" r="6.5" fill="${r.dark}" />
+  `);
+}
+
+function clubCutoutMini(p: AssetParams): string {
+  const r = ramp(p.color ?? '#1c1820');
+  const sh = castShadowColor(p);
+  const dress =
+    `M 224 274 C 242 270, 256 278, 268 302 C 296 326, 338 334, 378 328 ` +
+    `C 386 356, 389 380, 384 402 C 378 422, 366 436, 356 446 ` +
+    `C 326 440, 294 438, 268 448 C 252 454, 244 468, 246 482 ` +
+    `C 278 486, 326 484, 360 472 C 384 532, 414 576, 414 623 ` +
+    `C 414 662, 408 700, 402 736 C 340 752, 260 752, 198 736 ` +
+    `C 192 700, 186 662, 186 623 C 186 576, 218 538, 236 490 ` +
+    `C 240 468, 228 438, 216 402 C 210 374, 214 334, 224 274 Z`;
+  return toUri(`
+    ${defsBlock(r)}
+    <path d="${dress}" fill="${sh}" opacity="0.34" filter="url(#cBlur4)" transform="translate(0, 5)" />
+    <path d="${dress}" fill="url(#fBody)" />
+    ${bustContour(r, 1.0)}
+    <path d="M 210 568 C 198 618, 198 670, 206 728 C 228 674, 230 620, 238 568 Z" fill="url(#fSheen)" opacity="0.65" filter="url(#cBlur4)" />
+    <circle cx="352" cy="458" r="7.5" fill="none" stroke="url(#metalGold)" stroke-width="3.2" />
+    <path d="M 250 478 C 284 486, 322 482, 354 468" stroke="${r.specular}" stroke-width="1.6" opacity="0.45" fill="none" />
+  `);
+}
+
+function clubVelvetCorsetMini(p: AssetParams): string {
+  const r = ramp(p.color ?? '#1f1b24');
+  const sh = castShadowColor(p);
+  const bodice =
+    `M 224 336 C 244 320, 278 324, 300 352 C 322 324, 356 320, 376 336 ` +
+    `L 385 376 C 388 398, 384 418, 370 444 L 358 492 ` +
+    `C 324 504, 276 504, 242 492 L 230 444 C 216 418, 212 398, 215 376 Z`;
+  const skirt = skirtContour({ topY: 484, hemY: 745, silhouette: 'pencil' });
+  const boning = [256, 300, 344]
+    .map((x) => `<path d="M ${x} ${x === 300 ? 354 : 334} L ${x === 300 ? 300 : x < 300 ? x + 8 : x - 8} 492" stroke="${r.deep}" stroke-width="2" opacity="0.65" fill="none" />`)
+    .join('');
+  return toUri(`
+    ${defsBlock(r)}
+    <path d="${skirt}" fill="${sh}" opacity="0.34" filter="url(#cBlur4)" transform="translate(0, 5)" />
+    <path d="M 248 258 L 244 332 M 352 258 L 356 332" stroke="${r.mid}" stroke-width="4" stroke-linecap="round" />
+    <path d="${skirt}" fill="url(#fVert)" />
+    <path d="${bodice}" fill="url(#fBody)" />
+    ${bustContour(r, 1.0)}
+    ${boning}
+    <!-- Velvet lush highlight & side slit -->
+    <path d="M 206 566 C 192 618, 192 674, 200 732 C 220 676, 224 620, 232 566 Z" fill="url(#fSheen)" opacity="0.58" filter="url(#cBlur4)" />
+    <path d="M 352 632 L 368 746" stroke="${sh}" stroke-width="3.2" opacity="0.72" />
+  `);
+}
+
+function clubMetallicDrapeMini(p: AssetParams): string {
+  const r = ramp(p.color ?? '#c8d2dc');
+  const sh = castShadowColor(p);
+  const bodice =
+    `M 234 316 C 258 342, 282 354, 300 354 C 318 354, 342 342, 366 316 ` +
+    `L 384 352 C 388 378, 388 398, 382 418 L 358 492 ` +
+    `C 324 504, 276 504, 242 492 L 218 418 C 212 398, 212 378, 216 352 Z`;
+  const skirt = skirtContour({ topY: 484, hemY: 735, silhouette: 'pencil' });
+  return toUri(`
+    ${defsBlock(r)}
+    <path d="${skirt}" fill="${sh}" opacity="0.32" filter="url(#cBlur4)" transform="translate(0, 5)" />
+    <path d="M 246 258 L 242 320 M 354 258 L 358 320" stroke="${r.specular}" stroke-width="3.2" stroke-linecap="round" />
+    <path d="${skirt}" fill="url(#fVert)" />
+    <path d="${bodice}" fill="url(#fBody)" />
+    ${bustContour(r, 0.98)}
+    <!-- Liquid metallic speculars & cowl folds -->
+    <path d="M 244 334 C 276 364, 324 364, 356 334 M 252 352 C 280 376, 320 376, 348 352" stroke="${r.specular}" stroke-width="1.8" opacity="0.72" fill="none" />
+    <path d="M 216 534 C 266 552, 334 544, 384 528 M 200 584 C 256 602, 346 594, 400 578 M 204 636 C 260 652, 340 646, 396 632" stroke="${r.deep}" stroke-width="1.8" opacity="0.38" fill="none" />
+    <path d="M 218 538 C 202 602, 200 668, 206 728 C 228 670, 232 606, 240 538 Z" fill="#ffffff" opacity="0.28" filter="url(#cBlur4)" />
+  `);
+}
+
+function ankaraPeplumDress(p: AssetParams): string {
+  const r = ramp(p.color ?? '#d95829');
+  const accent = p.color2 ?? '#1d3c78';
+  const gold = '#f0c44d';
+  const sh = castShadowColor(p);
+  const sl = poseSleeves(p.pose, 'cap', 4.8);
+  const bodice = torsoContour({
+    neckPath: `L 346 266 C 324 306, 276 306, 254 266`,
+    hemY: 492,
+    ease: 1.5,
+  });
+  const peplum =
+    `M 240 482 C 276 494, 324 494, 360 482 ` +
+    `C 386 510, 408 542, 418 572 C 362 596, 238 596, 182 572 ` +
+    `C 192 542, 214 510, 240 482 Z`;
+  const skirt = skirtContour({ topY: 500, hemY: 945, silhouette: 'pencil' });
+  const ankaraPat = `
+    <pattern id="ankaraPat" width="28" height="28" patternUnits="userSpaceOnUse">
+      <rect width="28" height="28" fill="${r.mid}" />
+      <path d="M 14 0 L 28 14 L 14 28 L 0 14 Z" fill="${accent}" opacity="0.88" />
+      <circle cx="14" cy="14" r="6" fill="${gold}" opacity="0.92" />
+      <circle cx="14" cy="14" r="2.6" fill="${r.deep}" />
+      <circle cx="0" cy="0" r="3.5" fill="${gold}" opacity="0.82" />
+      <circle cx="28" cy="0" r="3.5" fill="${gold}" opacity="0.82" />
+      <circle cx="0" cy="28" r="3.5" fill="${gold}" opacity="0.82" />
+      <circle cx="28" cy="28" r="3.5" fill="${gold}" opacity="0.82" />
+    </pattern>`;
+  return toUri(`
+    ${defsBlock(r, ankaraPat)}
+    <path d="${sl.left}" fill="url(#ankaraPat)" stroke="${r.deep}" stroke-width="0.9" />
+    <path d="${sl.right}" fill="url(#ankaraPat)" stroke="${r.deep}" stroke-width="0.9" />
+    <path d="${skirt}" fill="${sh}" opacity="0.30" filter="url(#cBlur4)" transform="translate(0, 5)" />
+    <path d="${skirt}" fill="url(#ankaraPat)" />
+    <path d="${skirt}" fill="url(#fVert)" opacity="0.28" />
+    <path d="${peplum}" fill="${sh}" opacity="0.28" filter="url(#cBlur4)" transform="translate(0, 5)" />
+    <path d="${peplum}" fill="url(#ankaraPat)" />
+    <path d="${peplum}" fill="url(#fBody)" opacity="0.24" />
+    <path d="${bodice}" fill="url(#ankaraPat)" />
+    <path d="${bodice}" fill="url(#fBody)" opacity="0.24" />
+    ${bustContour(r, 0.72)}
+    <path d="M 240 478 C 276 490, 324 490, 360 478 L 362 496 C 324 508, 276 508, 238 496 Z" fill="${accent}" />
+    <path d="M 184 570 C 238 594, 362 594, 416 570" stroke="${gold}" stroke-width="2.2" fill="none" />
+  `);
+}
+
+function asoEbiLaceGown(p: AssetParams): string {
+  const r = ramp(p.color ?? '#155c44');
+  const gold = p.color2 ?? '#e6c15a';
+  const sh = castShadowColor(p);
+  const sl = poseSleeves(p.pose, 'threeQuarter', 2.0);
+  const bodice = torsoContour({
+    neckPath: `L 342 256 C 322 282, 278 282, 258 256`,
+    hemY: 496,
+    ease: 1.0,
+  });
+  const gown =
+    `M 240 490 C 224 548, 184 586, 183 623 C 184 680, 200 770, 212 850 ` +
+    `C 192 940, 152 1065, 132 1192 C 210 1218, 390 1218, 468 1192 ` +
+    `C 448 1065, 408 940, 388 850 C 400 770, 416 680, 417 623 ` +
+    `C 416 586, 376 548, 360 490 Z`;
+  const cordLace = `
+    <pattern id="asoLace" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="11" cy="11" r="7.5" fill="none" stroke="${gold}" stroke-width="1.1" opacity="0.62" />
+      <circle cx="11" cy="11" r="3.2" fill="${r.specular}" opacity="0.45" />
+      <circle cx="11" cy="11" r="1.4" fill="${gold}" opacity="0.88" />
+      <circle cx="0" cy="11" r="2.2" fill="${gold}" opacity="0.48" />
+      <circle cx="22" cy="11" r="2.2" fill="${gold}" opacity="0.48" />
+    </pattern>`;
+  return toUri(`
+    ${defsBlock(r, cordLace)}
+    <path d="${sl.left}" fill="url(#fSheer)" />
+    <path d="${sl.left}" fill="url(#asoLace)" />
+    <path d="${sl.right}" fill="url(#fSheer)" />
+    <path d="${sl.right}" fill="url(#asoLace)" />
+    <path d="${gown}" fill="${sh}" opacity="0.34" filter="url(#cBlur8)" transform="translate(0, 6)" />
+    <path d="${gown}" fill="url(#fVert)" />
+    <path d="${gown}" fill="url(#asoLace)" />
+    <path d="${bodice}" fill="url(#fBody)" />
+    <path d="${bodice}" fill="url(#asoLace)" />
+    ${bustContour(r, 0.92)}
+    <path d="M 240 484 C 276 496, 324 496, 360 484" stroke="${gold}" stroke-width="3.2" fill="none" />
+    <path d="M 224 338 C 254 320, 282 328, 300 352 C 318 328, 346 320, 376 338" stroke="${gold}" stroke-width="2.2" fill="none" />
+    <path d="M 222 864 C 202 960, 174 1070, 158 1198 M 378 864 C 398 960, 426 1070, 442 1198" stroke="${r.deep}" stroke-width="4.5" opacity="0.35" filter="url(#cBlur4)" fill="none" />
+  `);
+}
+
+function iroAndBubaEnsemble(p: AssetParams): string {
+  const r = ramp(p.color ?? '#1d4488');
+  const gold = p.color2 ?? '#e6c35c';
+  const sh = castShadowColor(p);
+  const sl = poseSleeves(p.pose, 'threeQuarter', 7.5);
+  const buba =
+    `M 248 262 C 276 280, 324 280, 352 262 L 406 286 L 392 342 ` +
+    `C 394 388, 384 434, 374 496 C 334 514, 266 514, 226 496 ` +
+    `C 216 434, 206 388, 208 342 L 194 286 Z`;
+  const iro = skirtContour({ topY: 488, hemY: 1125, silhouette: 'aline' });
+  const damask = `
+    <pattern id="brocadePat" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M 12 2 Q 19 12 12 22 Q 5 12 12 2 Z" fill="none" stroke="${r.specular}" stroke-width="1.0" opacity="0.28" />
+      <circle cx="12" cy="12" r="2.2" fill="${gold}" opacity="0.32" />
+    </pattern>`;
+  return toUri(`
+    ${defsBlock(r, damask)}
+    <path d="${iro}" fill="${sh}" opacity="0.30" filter="url(#cBlur4)" transform="translate(0, 5)" />
+    <path d="${iro}" fill="url(#fVert)" />
+    <path d="${iro}" fill="url(#brocadePat)" />
+    <!-- Diagonal traditional Iro wrapper fold & woven Aso-Oke hem -->
+    <path d="M 244 494 C 272 680, 302 890, 326 1134" stroke="${r.deep}" stroke-width="3.2" opacity="0.58" fill="none" />
+    <path d="M 248 494 C 276 680, 306 890, 330 1134" stroke="${gold}" stroke-width="1.8" opacity="0.72" fill="none" />
+    <path d="M 164 1084 C 240 1106, 360 1106, 436 1084 L 440 1124 C 360 1146, 240 1146, 160 1124 Z" fill="${gold}" opacity="0.86" />
+    <path d="M 162 1098 C 240 1120, 360 1120, 438 1098" stroke="${r.deep}" stroke-width="2.4" opacity="0.65" fill="none" />
+    <!-- Wide flowing Buba sleeves & blouse -->
+    <path d="${sl.left}" fill="url(#fBody)" />
+    <path d="${sl.right}" fill="url(#fBody)" />
+    <path d="${buba}" fill="${sh}" opacity="0.26" filter="url(#cBlur4)" transform="translate(0, 4)" />
+    <path d="${buba}" fill="url(#fBody)" />
+    <path d="${buba}" fill="url(#brocadePat)" />
+    ${bustContour(r, 0.85)}
+    <path d="M 248 262 C 276 282, 324 282, 352 262" stroke="${gold}" stroke-width="3.2" fill="none" />
+  `);
+}
+
+function adireIndigoKaftan(p: AssetParams): string {
+  const r = ramp(p.color ?? '#1b3568');
+  const gold = p.color2 ?? '#e6c15a';
+  const sh = castShadowColor(p);
+  const boubou =
+    `M 256 254 L 182 284 L 146 530 L 188 538 L 196 476 ` +
+    `C 178 680, 158 910, 148 1148 C 230 1176, 370 1176, 452 1148 ` +
+    `C 442 910, 422 680, 404 476 L 412 538 L 454 530 ` +
+    `L 418 284 L 344 254 L 300 338 Z`;
+  const adirePat = `
+    <pattern id="adirePat" width="32" height="32" patternUnits="userSpaceOnUse">
+      <circle cx="16" cy="16" r="11" fill="none" stroke="${r.specular}" stroke-width="1.3" stroke-dasharray="4 3" opacity="0.48" />
+      <circle cx="16" cy="16" r="6" fill="none" stroke="#ffffff" stroke-width="1.0" opacity="0.36" />
+      <circle cx="16" cy="16" r="2" fill="${gold}" opacity="0.48" />
+    </pattern>`;
+  return toUri(`
+    ${defsBlock(r, adirePat)}
+    <path d="${boubou}" fill="${sh}" opacity="0.32" filter="url(#cBlur8)" transform="translate(0, 6)" />
+    <path d="${boubou}" fill="url(#fVert)" />
+    <path d="${boubou}" fill="url(#adirePat)" />
+    <!-- Agbada-inspired Yoruba neckline & placket gold embroidery -->
+    <path d="M 256 254 L 300 338 L 344 254" stroke="${gold}" stroke-width="5.5" fill="none" stroke-linejoin="round" />
+    <path d="M 294 338 L 294 524 L 306 524 L 306 338 Z" fill="${gold}" opacity="0.88" />
+    <path d="M 278 320 L 300 356 L 322 320" stroke="${gold}" stroke-width="2.2" fill="none" />
+    <path d="M 218 470 C 204 680, 192 910, 186 1158 M 382 470 C 396 680, 408 910, 414 1158" stroke="${r.deep}" stroke-width="3.5" opacity="0.32" filter="url(#cBlur4)" fill="none" />
+  `);
+}
+
 
 
 /* ============================================================================
@@ -1308,6 +1678,18 @@ export const CLOTHING_CATALOG: StyleCatalogEntry[] = [
   { id: 'dress_tulle_ballgown', name: 'Couture Tulle Ballgown', category: 'dresses', defaultColor: '#c92a42' },
   { id: 'dress_pleated_shirt', name: 'Belted Pleated Shirtdress', category: 'dresses', defaultColor: '#5e7a68' },
   { id: 'dress_offshoulder_gown', name: 'Velvet Off-Shoulder Gown', category: 'dresses', defaultColor: '#8b1e2d' },
+  { id: 'dress_wrap_linen_midi', name: 'Linen Wrap Midi Dress', category: 'dresses', defaultColor: '#c2654c' },
+  { id: 'dress_floral_maxi', name: 'Botanical Chiffon Maxi', category: 'dresses', defaultColor: '#d9788e', defaultColor2: '#f5dde3' },
+  { id: 'dress_sequin_party_mini', name: 'Champagne Sequin Party Mini', category: 'dresses', defaultColor: '#e0b878', defaultColor2: '#fff8dc' },
+  { id: 'dress_tiered_cocktail', name: 'Tiered Ruffle Cocktail Mini', category: 'dresses', defaultColor: '#b82942' },
+  { id: 'dress_feather_satin_party', name: 'Satin Bow Party Mini', category: 'dresses', defaultColor: '#d48682' },
+  { id: 'dress_club_cutout_mini', name: 'Asymmetric Cutout Club Mini', category: 'dresses', defaultColor: '#1c1820' },
+  { id: 'dress_club_corset_velvet', name: 'Velvet Corset Club Mini', category: 'dresses', defaultColor: '#1f1b24' },
+  { id: 'dress_club_metallic_drape', name: 'Liquid Metal Draped Mini', category: 'dresses', defaultColor: '#c8d2dc' },
+  { id: 'dress_ankara_peplum', name: 'Ankara Peplum Midi Dress', category: 'dresses', defaultColor: '#d95829', defaultColor2: '#1d3c78' },
+  { id: 'dress_aso_ebi_lace', name: 'Aso-Ebi Beaded Lace Gown', category: 'dresses', defaultColor: '#155c44', defaultColor2: '#e6c15a' },
+  { id: 'dress_iro_buba', name: 'Iro & Buba Brocade Ensemble', category: 'dresses', defaultColor: '#1d4488', defaultColor2: '#e6c35c' },
+  { id: 'dress_adire_kaftan', name: 'Adire Indigo Boubou Kaftan', category: 'dresses', defaultColor: '#1b3568', defaultColor2: '#e6c15a' },
 
   // Bottoms
   { id: 'bot_highwaist_trousers', name: 'High-Waist Tailored Trousers', category: 'bottoms', defaultColor: '#36333b' },
@@ -1344,7 +1726,7 @@ export const CLOTHING_CATALOG: StyleCatalogEntry[] = [
   { id: 'shoe_court_sneakers', name: 'Minimalist Court Sneakers', category: 'shoes', defaultColor: '#f5f2ec', defaultColor2: '#2f4e3d' },
   { id: 'shoe_chelsea_boots', name: 'Lug-Sole Chelsea Boots', category: 'shoes', defaultColor: '#272228' },
   { id: 'shoe_overknee_boots', name: 'Over-the-Knee Boots', category: 'shoes', defaultColor: '#201c24' },
-
+  ...EXTRA_CLOTHING_CATALOG,
 ];
 
 export const CLOTHING_GENERATORS: Record<string, (p: AssetParams) => string> = {
@@ -1369,6 +1751,18 @@ export const CLOTHING_GENERATORS: Record<string, (p: AssetParams) => string> = {
   dress_tulle_ballgown: tulleBallGown,
   dress_pleated_shirt: pleatedShirtDress,
   dress_offshoulder_gown: offShoulderGown,
+  dress_wrap_linen_midi: wrapLinenMidiDress,
+  dress_floral_maxi: botanicalChiffonMaxi,
+  dress_sequin_party_mini: sequinPartyMini,
+  dress_tiered_cocktail: tieredCocktailMini,
+  dress_feather_satin_party: satinBowPartyDress,
+  dress_club_cutout_mini: clubCutoutMini,
+  dress_club_corset_velvet: clubVelvetCorsetMini,
+  dress_club_metallic_drape: clubMetallicDrapeMini,
+  dress_ankara_peplum: ankaraPeplumDress,
+  dress_aso_ebi_lace: asoEbiLaceGown,
+  dress_iro_buba: iroAndBubaEnsemble,
+  dress_adire_kaftan: adireIndigoKaftan,
 
   // Bottoms
   bot_highwaist_trousers: highWaistTrousers,
@@ -1406,7 +1800,7 @@ export const CLOTHING_GENERATORS: Record<string, (p: AssetParams) => string> = {
   shoe_chelsea_boots: chelseaBoots,
   shoe_overknee_boots: overKneeBoots,
   shoe_barefoot: barefoot,
-
+  ...EXTRA_CLOTHING_GENERATORS,
 };
 
 export function clothingAsset(assetId: string, p: AssetParams): string {

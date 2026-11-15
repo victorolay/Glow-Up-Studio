@@ -1,5 +1,6 @@
 import type { AssetParams } from './params';
 import { shade, toUri } from './primitives';
+import { HAIR_STYLE_GENERATORS_EXTRA } from './hairArtExtra';
 
 /*
  * Hair styles fitted precisely to the 600×1280 front-facing model in figure.ts:
@@ -26,7 +27,7 @@ interface HairRamp {
   sh3: string;
 }
 
-function hairRamp(color: string): HairRamp {
+export function hairRamp(color: string): HairRamp {
   return {
     hi2: shade(color, 0.38),
     hi1: shade(color, 0.18),
@@ -37,7 +38,7 @@ function hairRamp(color: string): HairRamp {
   };
 }
 
-function defs(idPrefix: string, r: HairRamp, y2 = 340): string {
+export function defs(idPrefix: string, r: HairRamp, y2 = 340): string {
   return `<defs>
     <filter id="${idPrefix}Blur" filterUnits="userSpaceOnUse" x="180" y="30" width="240" height="430">
       <feGaussianBlur stdDeviation="1.8" />
@@ -71,7 +72,7 @@ function defs(idPrefix: string, r: HairRamp, y2 = 340): string {
  * Open-face skull horseshoe behind the ears (fits x 249–351, crown y 76)
  * with the entire face window (x 256–344, y 90–208) cut out.
  */
-function openSkullBack(idPrefix: string): string {
+export function openSkullBack(idPrefix: string): string {
   return (
     `<path d="M 300 76 ` +
     `C 268 76, 250 96, 249 128 ` +
@@ -88,7 +89,7 @@ function openSkullBack(idPrefix: string): string {
 }
 
 /** Sleek pulled-back hairline hugging FACE_OVAL (x 254–346, y 84) with ears & face completely clear. */
-function sleekHairlineFront(idPrefix: string, r: HairRamp, shine: boolean): string {
+export function sleekHairlineFront(idPrefix: string, r: HairRamp, shine: boolean): string {
   return (
     `<path d="M 300 76 ` +
     `C 269 76, 251 97, 250 128 ` +
@@ -108,7 +109,7 @@ function sleekHairlineFront(idPrefix: string, r: HairRamp, shine: boolean): stri
   );
 }
 
-type StyleFn = (color: string, p: AssetParams) => { back: string; front: string };
+export type StyleFn = (color: string, p: AssetParams) => { back: string; front: string };
 
 /** 1. Long Waves — soft parted S-waves framing the face and cascading over shoulders onto upper bust (y 71–404). */
 const longWaves: StyleFn = (color, p) => {
@@ -180,7 +181,7 @@ const longWaves: StyleFn = (color, p) => {
 };
 
 /** 2. Beach Braids — tightly woven twin braids resting over inner shoulders/clavicles (x 261 & 339, y 76–368). */
-function braidTail(xCenter: number, side: -1 | 1, idPrefix: string, r: HairRamp, shine: boolean): string {
+export function braidTail(xCenter: number, side: -1 | 1, idPrefix: string, r: HairRamp, shine: boolean): string {
   const count = 9;
   const endY = 186 + count * 17;
   const endX = xCenter + side * -2;
@@ -522,6 +523,7 @@ export const HAIR_STYLE_GENERATORS: Record<string, StyleFn> = {
   placeholder_hair_short_crop: shortCrop,
   placeholder_hair_elegant_updo: elegantUpdo,
   placeholder_hair_natural_afro: naturalAfro,
+  ...HAIR_STYLE_GENERATORS_EXTRA,
 };
 
 export function hairAsset(assetId: string, p: AssetParams): string {
@@ -531,3 +533,7 @@ export function hairAsset(assetId: string, p: AssetParams): string {
   const parts = fn(color, p);
   return toUri(p.hairBack ? parts.back : parts.front);
 }
+
+export const HAIR_GENERATORS: Record<string, (p: AssetParams) => string> = Object.fromEntries(
+  Object.keys(HAIR_STYLE_GENERATORS).map((id) => [id, (p: AssetParams) => hairAsset(id, p)]),
+);

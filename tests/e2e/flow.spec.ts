@@ -51,6 +51,6 @@ test.describe('core flow smoke test', () => {
     await page.getByTestId('challenge-card-free-play').click();
     await expect(page.getByTestId('skincare-step-scan')).toBeVisible();
     // No hint panel in free play
-    await expect(page.getByText('💡 Hints')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /Toggle stylist hints/i })).toHaveCount(0);
   });
 });

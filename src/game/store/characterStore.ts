@@ -10,8 +10,10 @@ import type {
   Parting,
   PhotoShot,
   PoseId,
+  SavedLookRecipe,
   SkincareStepId,
 } from '@/game/types';
+import { useProgressStore } from './progressStore';
 import { create } from 'zustand';
 
 export interface VariantSelection {
@@ -68,6 +70,8 @@ interface CharacterActions {
   addShot: (shot: PhotoShot) => void;
   deleteShot: (id: string) => void;
   setFavorite: (id: string) => void;
+  resetMuse: () => void;
+  loadLookRecipe: (recipe: SavedLookRecipe) => void;
   resetForChallenge: () => void;
 }
 
@@ -108,10 +112,26 @@ const initialData: CharacterData = {
 export const useCharacterStore = create<CharacterStore>((set) => ({
   ...initialData,
 
-  setSkinTone: (id) => set({ skinToneId: id }),
-  setEyeColor: (id) => set({ eyeColorId: id }),
-  toggleFreckles: () => set((s) => ({ freckles: !s.freckles })),
-  toggleBeautyMark: () => set((s) => ({ beautyMark: !s.beautyMark })),
+  setSkinTone: (id) => {
+    useProgressStore.getState().setMuse({ skinToneId: id });
+    set({ skinToneId: id });
+  },
+  setEyeColor: (id) => {
+    useProgressStore.getState().setMuse({ eyeColorId: id });
+    set({ eyeColorId: id });
+  },
+  toggleFreckles: () =>
+    set((s) => {
+      const next = !s.freckles;
+      useProgressStore.getState().setMuse({ freckles: next });
+      return { freckles: next };
+    }),
+  toggleBeautyMark: () =>
+    set((s) => {
+      const next = !s.beautyMark;
+      useProgressStore.getState().setMuse({ beautyMark: next });
+      return { beautyMark: next };
+    }),
 
   completeSkincareStep: (step) =>
     set((s) => {
@@ -179,12 +199,66 @@ export const useCharacterStore = create<CharacterStore>((set) => ({
     }),
   setFavorite: (id) => set({ favoriteShotId: id }),
 
-  resetForChallenge: () =>
+  resetMuse: () => {
+    useProgressStore.getState().resetMuse();
+    set({
+      skinToneId: DEFAULT_SKIN_TONE_ID,
+      eyeColorId: 'brown',
+      freckles: false,
+      beautyMark: false,
+    });
+  },
+
+  loadLookRecipe: (recipe) => {
+    useProgressStore.getState().setMuse({
+      skinToneId: recipe.skinToneId,
+      eyeColorId: recipe.eyeColorId,
+      freckles: recipe.freckles,
+      beautyMark: recipe.beautyMark,
+    });
+    const skinHealth = recipe.skinHealth ?? 85;
     set({
       ...initialData,
+      skinToneId: recipe.skinToneId,
+      eyeColorId: recipe.eyeColorId,
+      freckles: recipe.freckles,
+      beautyMark: recipe.beautyMark,
+      skincare: {
+        completed: {
+          scan: true,
+          cleanse: true,
+          blemish: true,
+          mask: true,
+          serum: true,
+          moisturizer: true,
+          sunscreen: true,
+        },
+        skinHealth,
+      },
+      makeup: { ...recipe.makeup },
+      hair: { ...recipe.hair },
+      outfit: { ...recipe.outfit },
+      accessories: { ...recipe.accessories },
+      pose: recipe.pose ?? 'relaxed',
+      backgroundId: recipe.backgroundId ?? DEFAULT_BACKGROUND_ID,
+      filterId: recipe.filterId ?? DEFAULT_FILTER_ID,
+      shots: [],
+      favoriteShotId: undefined,
+    });
+  },
+
+  resetForChallenge: () => {
+    const muse = useProgressStore.getState().muse;
+    set({
+      ...initialData,
+      skinToneId: muse?.skinToneId ?? DEFAULT_SKIN_TONE_ID,
+      eyeColorId: muse?.eyeColorId ?? 'brown',
+      freckles: muse?.freckles ?? false,
+      beautyMark: muse?.beautyMark ?? false,
       skincare: { ...DEFAULT_SKINCARE, completed: { ...DEFAULT_SKINCARE.completed } },
       hair: { ...DEFAULT_HAIR, parting: 'center', shine: true },
-    }),
+    });
+  },
 }));
 
 export const MAX_SHOTS = 4;

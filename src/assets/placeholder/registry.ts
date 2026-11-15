@@ -3,7 +3,7 @@ import { ACCESSORY_GENERATORS } from './accessoriesArt';
 import { backgroundAsset } from './backgroundArt';
 import { CLOTHING_GENERATORS } from './clothingArt';
 import { bodyAsset, faceAsset, skinAsset } from './figure';
-import { hairAsset } from './hairArt';
+import { HAIR_GENERATORS } from './hairArt';
 import {
   blushAsset,
   concealerAsset,
@@ -42,14 +42,7 @@ export const GENERATORS: Record<string, Generator> = {
   placeholder_makeup_eyeliner_bold: (p) => eyelinerAsset({ ...p, linerStyle: 'bold' }),
   placeholder_makeup_mascara: (p) => mascaraAsset(p),
   placeholder_makeup_lipstick: (p) => lipstickAsset(p),
-  placeholder_hair_long_waves: (p) => hairAsset('placeholder_hair_long_waves', p),
-  placeholder_hair_beach_braids: (p) => hairAsset('placeholder_hair_beach_braids', p),
-  placeholder_hair_sleek_bun: (p) => hairAsset('placeholder_hair_sleek_bun', p),
-  placeholder_hair_curly_bob: (p) => hairAsset('placeholder_hair_curly_bob', p),
-  placeholder_hair_ponytail: (p) => hairAsset('placeholder_hair_ponytail', p),
-  placeholder_hair_short_crop: (p) => hairAsset('placeholder_hair_short_crop', p),
-  placeholder_hair_elegant_updo: (p) => hairAsset('placeholder_hair_elegant_updo', p),
-  placeholder_hair_natural_afro: (p) => hairAsset('placeholder_hair_natural_afro', p),
+  ...HAIR_GENERATORS,
   placeholder_bg_sandy_beach: () => backgroundAsset('placeholder_bg_sandy_beach'),
   placeholder_bg_beach_cafe: () => backgroundAsset('placeholder_bg_beach_cafe'),
   placeholder_bg_golden_dunes: () => backgroundAsset('placeholder_bg_golden_dunes'),
@@ -62,6 +55,8 @@ export const GENERATORS: Record<string, Generator> = {
   placeholder_bg_pumpkin_patch: () => backgroundAsset('placeholder_bg_pumpkin_patch'),
   placeholder_bg_snowy_village: () => backgroundAsset('placeholder_bg_snowy_village'),
   placeholder_bg_cozy_den: () => backgroundAsset('placeholder_bg_cozy_den'),
+  placeholder_bg_club_lounge: () => backgroundAsset('placeholder_bg_club_lounge'),
+  placeholder_bg_owambe_hall: () => backgroundAsset('placeholder_bg_owambe_hall'),
   ...CLOTHING_GENERATORS,
   ...ACCESSORY_GENERATORS,
 };
